@@ -5,12 +5,17 @@ import { useState } from "react";
 const PAYMENT_METHODS = ["gcash", "maya", "card"] as const;
 type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
+export interface SelectedSeatChip {
+  id: string;
+  label: string;
+}
+
 interface BookingSummarySidebarProps {
   pricePerSeat: number;
   selectedCount: number;
   total: number;
-  seatLabels: string[];
-  onRemoveSeat: (label: string) => void;
+  selectedSeats: SelectedSeatChip[];
+  onRemoveSeat: (id: string) => void;
   seatTypeLabel: string;
 }
 
@@ -18,7 +23,7 @@ export function BookingSummarySidebar({
   pricePerSeat,
   selectedCount,
   total,
-  seatLabels,
+  selectedSeats,
   onRemoveSeat,
   seatTypeLabel,
 }: BookingSummarySidebarProps) {
@@ -78,18 +83,18 @@ export function BookingSummarySidebar({
           </div>
         </div>
 
-        {seatLabels.length > 0 && (
+        {selectedSeats.length > 0 && (
           <div className="mt-6 border-t-2 border-dashed border-on-background/20 pt-6">
             <p className="mb-3 font-label text-xs uppercase opacity-70">Your Seats</p>
             <div className="flex flex-wrap gap-2">
-              {seatLabels.map((label) => (
+              {selectedSeats.map((seat) => (
                 <button
-                  key={label}
-                  onClick={() => onRemoveSeat(label)}
-                  title={`Remove ${label}`}
+                  key={seat.id}
+                  onClick={() => onRemoveSeat(seat.id)}
+                  title={`Remove ${seat.label}`}
                   className="border-2 border-secondary bg-secondary px-2 py-1 font-label text-xs font-bold text-white hover:bg-secondary/80"
                 >
-                  {label}
+                  {seat.label}
                 </button>
               ))}
             </div>

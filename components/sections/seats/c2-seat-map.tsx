@@ -17,8 +17,14 @@ export function C2SeatMap() {
   const [selected, setSelected] = useState<number[]>([]);
 
   const total = useMemo(() => selected.length * config.pricePerSeat, [selected.length]);
-  const seatLabels = useMemo(
-    () => [...selected].sort((a, b) => a - b).map(getSeatLabel),
+  const selectedSeats = useMemo(
+    () =>
+      [...selected]
+        .sort((a, b) => a - b)
+        .map((id) => {
+          const label = getSeatLabel(id);
+          return { id: String(id), label };
+        }),
     [selected],
   );
 
@@ -27,8 +33,9 @@ export function C2SeatMap() {
     setSelected((prev) => (prev.includes(index) ? prev.filter((id) => id !== index) : [...prev, index]));
   };
 
-  const removeByLabel = (label: string) => {
-    setSelected((prev) => prev.filter((id) => getSeatLabel(id) !== label));
+  const removeById = (id: string) => {
+    const index = Number(id);
+    setSelected((prev) => prev.filter((seatId) => seatId !== index));
   };
 
   return (
@@ -87,8 +94,8 @@ export function C2SeatMap() {
         pricePerSeat={config.pricePerSeat}
         selectedCount={selected.length}
         total={total}
-        seatLabels={seatLabels}
-        onRemoveSeat={removeByLabel}
+        selectedSeats={selectedSeats}
+        onRemoveSeat={removeById}
         seatTypeLabel={config.label}
       />
     </div>
