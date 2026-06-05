@@ -33,9 +33,9 @@ export const seatTypeConfigs: Record<SeatType, SeatTypeConfig> = {
     venue: "Uptown Mall BGC — Premium Hall",
     pricePerSeat: 650,
     rows: 8,
-    cols: 8,
+    cols: 10,
     rowLabels: "ABCDEFGH".split(""),
-    reserved: [3, 4, 11, 12, 27, 28, 35, 36, 51, 52],
-    aisleAfterCol: 3,
+    // colIndex 0=col10 … colIndex 9=col1; reserved: B8,B7 / D6,D5 / F4,F3
+    reserved: [12, 13, 34, 35, 56, 57],
   },
 };
