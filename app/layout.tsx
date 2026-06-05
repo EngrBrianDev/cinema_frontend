@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Be_Vietnam_Pro,
-  Bricolage_Grotesque,
-  Space_Grotesk,
-} from "next/font/google";
+import { Be_Vietnam_Pro, Bricolage_Grotesque, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -12,22 +8,21 @@ const bricolage = Bricolage_Grotesque({
   weight: ["700", "800"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const space = Space_Grotesk({
+  variable: "--font-space",
   subsets: ["latin"],
-  weight: ["700"],
+  weight: ["400", "500", "700"],
 });
 
-const beVietnam = Be_Vietnam_Pro({
-  variable: "--font-be-vietnam",
+const vietnam = Be_Vietnam_Pro({
+  variable: "--font-vietnam",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "DA REUNION | Home Along Da Riles",
-  description:
-    "A nostalgic reunion screening landing page for Home Along Da Riles.",
+  title: "DA REUNION",
+  description: "Cinema booking and ticket management",
 };
 
 export default function RootLayout({
@@ -36,11 +31,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${bricolage.variable} ${spaceGrotesk.variable} ${beVietnam.variable} light h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="en" className={`${bricolage.variable} ${space.variable} ${vietnam.variable}`}>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen bg-background text-on-background font-body-md">{children}</body>
     </html>
   );
 }
