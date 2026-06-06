@@ -25,6 +25,9 @@ export const metadata: Metadata = {
   description: "Cinema booking and ticket management",
 };
 
+import Script from "next/script";
+import { AuthProvider } from "@/context/auth-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${bricolage.variable} ${space.variable} ${vietnam.variable}`}>
-      <body className="min-h-screen bg-background text-on-background font-body-md">{children}</body>
+      <body className="min-h-screen bg-background text-on-background font-body-md">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+      </body>
     </html>
   );
 }

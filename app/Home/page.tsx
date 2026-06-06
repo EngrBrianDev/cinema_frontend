@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MainHeader } from "@/components/layout/main-header";
 
 const posterSrc = "/image/cinema_ticket.jpg";
 
@@ -116,36 +117,7 @@ function SponsorMarquee() {
 export default function Home() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#fcf9f8] text-[#1c1b1b]">
-      <header className="fixed inset-x-0 top-0 z-50 border-b-4 border-[#bb0014] bg-[#004e9f] shadow-[0_4px_0_#ffe16d]">
-        <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-6 px-5 md:px-10 xl:px-16">
-          <div className="flex min-w-0 items-center gap-7">
-            <h1 className="shrink-0 font-headline text-2xl font-black uppercase tracking-normal text-[#ffe16d] md:text-3xl">
-              DA REUNION
-            </h1>
-            <nav className="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
-              <a className="font-label text-sm font-black uppercase text-[#ffe16d] underline decoration-2 underline-offset-8" href="#">
-                Movies
-              </a>
-              <a className="font-label text-sm font-black uppercase text-white transition-colors hover:text-[#ffe16d]" href="#">
-                Promos
-              </a>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button className="railroad-border flex h-11 items-center gap-2 bg-[#1c1b1b] px-4 text-[#ffe16d] transition-transform active:scale-95">
-              <Icon className="h-5 w-5" name="ticket" />
-              <span className="font-label text-sm font-black uppercase">My Tickets</span>
-            </button>
-            <button
-              aria-label="Account"
-              className="hidden h-11 w-11 items-center justify-center text-[#ffe16d] transition-colors hover:bg-[#bb0014] md:flex"
-            >
-              <Icon className="h-7 w-7" name="account" />
-            </button>
-          </div>
-        </div>
-      </header>
+      <MainHeader />
 
       <main className="pt-20">
         <section className="relative border-b-4 border-[#1c1b1b] bg-[linear-gradient(120deg,#fff8eb_0%,#fcf9f8_52%,#ffe16d_52%,#ffe16d_54%,#fcf9f8_54%)]">

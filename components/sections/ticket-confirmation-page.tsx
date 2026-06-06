@@ -5,7 +5,7 @@ import { confirmedTicket } from "@/lib/mock-data/cinema-data";
 
 export function TicketConfirmationPage() {
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8">
       <SectionTitle title="Ticket Secured" subtitle="A copy of this ticket has been sent to your email." />
       <div className="grid gap-6 lg:grid-cols-2">
         <HardShadowCard shadow="black">
