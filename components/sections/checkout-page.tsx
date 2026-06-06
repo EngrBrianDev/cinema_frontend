@@ -8,6 +8,7 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { checkoutSummary as mockSummary } from "@/lib/mock-data/cinema-data";
 import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api";
+import Link from "next/link";
 
 export function CheckoutPage() {
   const [summary, setSummary] = useState<any>(null);
@@ -193,6 +194,35 @@ export function CheckoutPage() {
               >
                 Use Dev Login
               </button>
+            </div>
+          </div>
+        </HardShadowCard>
+      </div>
+    );
+  }
+
+  if (!summary || !summary.selectedSeats || summary.selectedSeats.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-md px-4 py-16">
+        <HardShadowCard shadow="black">
+          <div className="p-4 text-center space-y-6 flex flex-col items-center">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b]">
+              <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+              </svg>
+            </div>
+            <h2 className="font-headline text-2xl font-black uppercase text-secondary">
+              No Seats Selected
+            </h2>
+            <p className="font-body-md text-sm text-outline max-w-xs leading-relaxed">
+              Please select seats first before proceeding to checkout.
+            </p>
+            <div className="border-t-2 border-on-background/10 pt-6 w-full">
+              <Link href="/seats">
+                <button className="w-full border-4 border-on-background bg-tertiary-fixed py-2.5 font-headline text-xs font-bold uppercase shadow-[2px_2px_0_0_#1c1b1b] hover:bg-[#ffe88f] cursor-pointer">
+                  Go Select Seats
+                </button>
+              </Link>
             </div>
           </div>
         </HardShadowCard>
