@@ -119,9 +119,9 @@ export function MainHeader() {
         {/* Left Side: Brand and Links */}
         <div className="flex min-w-0 items-center gap-7">
           <Link href="/" className="shrink-0">
-            <h1 className="font-headline text-2xl font-black uppercase tracking-normal text-tertiary-fixed md:text-3xl hover:opacity-90">
-              DA REUNION
-            </h1>
+            <h1 className="font-serif text-xl md:text-xl lg:text-2xl font-bold uppercase tracking-[0.19em] text-tertiary-fixed hover:text-yellow-300 transition-colors">
+              Inspire Cinema
+              </h1>
           </Link>
           <nav className="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
             <Link
