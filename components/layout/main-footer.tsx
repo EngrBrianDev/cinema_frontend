@@ -273,9 +273,9 @@ export function MainFooter() {
   const [activeModal, setActiveModal] = useState<FooterModal>(null);
 
   return (
-    <footer className="mt-16 border-t-8 border-secondary bg-[#1c1b1b] px-4 py-10 text-white sm:px-6 md:px-10 md:py-12 xl:px-16">
+    <footer className="mt-10 border-t-8 border-secondary bg-[#1c1b1b] px-4 py-6 text-white sm:mt-16 sm:px-6 sm:py-10 md:px-10 md:py-12 xl:px-16">
       <div className="mx-auto w-full max-w-[1440px]">
-        <div className="grid items-start gap-10 sm:grid-cols-2 md:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr] md:gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 sm:gap-10 md:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr] md:gap-8 lg:gap-12">
           <div className="min-w-0">
             <Link
               href="/"
@@ -291,14 +291,14 @@ export function MainFooter() {
                 style={{ width: "140px", height: "auto" }}
               />
             </Link>
-            <p className="mt-4 max-w-72 font-label text-xs uppercase leading-5 text-white/55">
+            <p className="mt-3 max-w-72 font-label text-xs uppercase leading-5 text-white/55 sm:mt-4">
               The ultimate fan experience for Philippine cinema classics.
             </p>
           </div>
 
           <div className="min-w-0">
             <h2 className="font-headline text-sm uppercase text-white">Quick Links</h2>
-            <nav className="mt-5 flex flex-col items-start gap-3" aria-label="Footer quick links">
+            <nav className="mt-3 flex flex-col items-start gap-2 sm:mt-5 sm:gap-3" aria-label="Footer quick links">
               {quickLinks.map((link) => (
                 "href" in link ? (
                   <Link
@@ -324,7 +324,7 @@ export function MainFooter() {
 
           <div className="min-w-0">
             <h2 className="font-headline text-sm uppercase text-white">Support</h2>
-            <nav className="mt-5 flex flex-col items-start gap-3" aria-label="Footer support links">
+            <nav className="mt-3 flex flex-col items-start gap-2 sm:mt-5 sm:gap-3" aria-label="Footer support links">
               {supportLinks.map((link) => (
                 <button
                   key={link.label}
@@ -339,23 +339,8 @@ export function MainFooter() {
           </div>
 
           <div className="min-w-0">
-            <h2 className="font-headline text-sm uppercase text-white">Support</h2>
-            <nav className="mt-5 flex flex-col items-start gap-3" aria-label="Footer support links">
-              {supportLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="font-label text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="min-w-0">
             <h2 className="font-headline text-sm uppercase text-white">Follow Us</h2>
-            <div className="mt-5 flex gap-3">
+            <div className="mt-3 flex gap-3 sm:mt-5">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -372,7 +357,7 @@ export function MainFooter() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/10 pt-6 text-center">
+        <div className="mt-6 border-t border-white/10 pt-4 text-center sm:mt-10 sm:pt-6">
           <p className="font-label text-[10px] font-black uppercase text-white/35 sm:text-xs">
             &copy; 2026 Inspire Cinema. All rights reserved.
           </p>
