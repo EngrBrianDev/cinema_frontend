@@ -144,7 +144,7 @@ export function PaymentMethodTabs() {
   const totalAmount = summary ? summary.total : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {error && (
         <div className="border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
           ⚠️ {error}
@@ -152,7 +152,7 @@ export function PaymentMethodTabs() {
       )}
 
       {/* Payment tabs */}
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         {methods.map((item) => (
           <button
             key={item}
@@ -161,7 +161,7 @@ export function PaymentMethodTabs() {
               setError(null);
             }}
             disabled={isSubmitting}
-            className={`border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
+            className={`border-4 p-2 font-headline text-xs font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none sm:p-3 sm:text-sm ${
               method === item
                 ? "bg-secondary text-white border-on-background"
                 : "bg-surface-variant border-outline hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background"
@@ -173,7 +173,7 @@ export function PaymentMethodTabs() {
       </div>
 
       {/* Payment details content */}
-      <div className="border-4 border-on-background bg-background p-6 shadow-[4px_4px_0_0_#1c1b1b]">
+      <div className="border-4 border-on-background bg-background p-3 shadow-[4px_4px_0_0_#1c1b1b] sm:p-6">
         {method === "card" ? (
           <div className="space-y-5 text-center py-6 px-4 flex flex-col items-center">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-[#0070ba] text-white shadow-[2px_2px_0_0_#1c1b1b]">
@@ -205,42 +205,42 @@ export function PaymentMethodTabs() {
             </div>
           </div>
         ) : (
-          <div className="space-y-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+          <div className="flex flex-col items-center justify-between gap-3 space-y-3 md:flex-row md:gap-6 md:space-y-6">
             {/* GCash QR */}
-            <div className="w-full md:w-1/2 flex flex-col items-center text-center space-y-3">
+            <div className="flex w-full flex-col items-center space-y-2 text-center md:w-1/2 md:space-y-3">
               <span className="font-label text-xs uppercase font-extrabold text-secondary">
                 Scan to Pay: ₱{totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </span>
-              <div className="border-4 border-on-background p-2 bg-white shadow-[3px_3px_0_0_#1c1b1b]">
+              <div className="border-4 border-on-background bg-white p-2 shadow-[3px_3px_0_0_#1c1b1b]">
                 <img
                   src="/image/gcash-qr.png"
                   alt="GCash QR Code"
-                  className="w-48 h-48 object-contain"
+                  className="h-32 w-32 object-contain sm:h-48 sm:w-48"
                 />
               </div>
-              <p className="font-body-sm text-[11px] text-outline leading-tight max-w-[200px]">
+              <p className="font-body-sm max-w-[200px] text-[10px] leading-tight text-outline sm:text-[11px]">
                 Scan the QR code above in your GCash app and send the exact amount.
               </p>
             </div>
 
             {/* Receipt Upload */}
-            <div className="w-full md:w-1/2 flex flex-col space-y-3 self-stretch justify-center">
+            <div className="flex w-full flex-col justify-center space-y-2 self-stretch md:w-1/2 md:space-y-3">
               <span className="font-label text-xs uppercase font-extrabold">
                 Upload Payment Receipt
               </span>
               
               <div
                 onClick={() => !isSubmitting && fileInputRef.current?.click()}
-                className={`border-4 border-dashed border-outline hover:border-secondary bg-surface-variant flex flex-col items-center justify-center p-6 text-center cursor-pointer min-h-[180px] transition-colors relative ${
+                className={`relative flex min-h-[112px] cursor-pointer flex-col items-center justify-center border-4 border-dashed border-outline bg-surface-variant p-4 text-center transition-colors hover:border-secondary sm:min-h-[180px] sm:p-6 ${
                   receiptPreview ? "p-2" : ""
                 }`}
               >
                 {receiptPreview ? (
-                  <div className="relative w-full h-full min-h-[160px] flex flex-col items-center justify-center">
+                  <div className="relative flex h-full min-h-[96px] w-full flex-col items-center justify-center sm:min-h-[160px]">
                     <img
                       src={receiptPreview}
                       alt="Receipt Preview"
-                      className="max-h-[130px] object-contain border-2 border-on-background mb-2"
+                      className="mb-2 max-h-[80px] border-2 border-on-background object-contain sm:max-h-[130px]"
                     />
                     <span className="font-label text-[9px] uppercase font-bold bg-secondary text-white px-2 py-0.5 rounded shadow-[1px_1px_0_0_#1c1b1b]">
                       Selected: {receiptFile?.name}
@@ -248,7 +248,7 @@ export function PaymentMethodTabs() {
                   </div>
                 ) : (
                   <>
-                    <svg className="w-8 h-8 text-outline mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="mb-1 h-6 w-6 text-outline sm:mb-2 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                     <p className="font-label text-xs font-bold uppercase text-secondary">
@@ -278,7 +278,7 @@ export function PaymentMethodTabs() {
       <button
         onClick={handlePayment}
         disabled={isSubmitting || !summary}
-        className={`w-full border-4 border-on-background p-4 font-headline text-base font-extrabold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed ${
+        className={`w-full border-4 border-on-background p-3 font-headline text-sm font-extrabold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none sm:p-4 sm:text-base ${
           isSubmitting
             ? "bg-outline"
             : "bg-secondary hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"

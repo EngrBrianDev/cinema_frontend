@@ -34,7 +34,7 @@ export function SeatTypeTabs() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div className="flex h-16 items-center justify-center sm:h-64">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
       </div>
     );
