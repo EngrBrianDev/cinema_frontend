@@ -56,6 +56,11 @@ export function MainHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navItems = [
+    { href: "/", label: "Movies" },
+    { href: "/seats", label: "Seats" },
+    { href: "/checkout", label: "Checkout" },
+  ];
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -115,48 +120,36 @@ export function MainHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b-4 border-secondary bg-primary shadow-[0_4px_0_var(--tertiary-fixed)]">
-      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-6 px-5 md:px-10 xl:px-16">
+      <div className="mx-auto flex max-w-[1440px] flex-col px-3 py-2 sm:px-5 md:px-8 lg:min-h-20 lg:flex-row lg:items-center lg:justify-between lg:gap-4 xl:px-16">
+        <div className="flex min-h-14 items-center justify-between gap-2 sm:gap-4 lg:min-h-0 lg:flex-1">
         {/* Left Side: Brand and Links */}
-        <div className="flex min-w-0 items-center gap-7">
-          <Link href="/" className="shrink-0">
-            <h1 className="font-serif text-xl md:text-xl lg:text-2xl font-bold uppercase tracking-[0.19em] text-tertiary-fixed hover:text-yellow-300 transition-colors">
+        <div className="flex min-w-0 items-center gap-4 lg:gap-7">
+          <Link href="/" className="min-w-0 shrink">
+            <h1 className="max-w-[45vw] truncate font-serif text-[clamp(1rem,5vw,1.5rem)] font-bold uppercase tracking-[0.08em] text-tertiary-fixed transition-colors hover:text-yellow-300 sm:max-w-none sm:tracking-[0.14em] lg:tracking-[0.19em]">
               Inspire Cinema
               </h1>
           </Link>
-          <nav className="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
-            <Link
-              href="/"
-              className={`font-label text-sm font-black uppercase transition-colors hover:text-tertiary-fixed ${
-                pathname === "/" ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
-              }`}
-            >
-              Movies
-            </Link>
-            <Link
-              href="/seats"
-              className={`font-label text-sm font-black uppercase transition-colors hover:text-tertiary-fixed ${
-                pathname === "/seats" ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
-              }`}
-            >
-              Seats
-            </Link>
-            <Link
-              href="/checkout"
-              className={`font-label text-sm font-black uppercase transition-colors hover:text-tertiary-fixed ${
-                pathname === "/checkout" ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
-              }`}
-            >
-              Checkout
-            </Link>
+          <nav className="hidden items-center gap-4 lg:flex lg:gap-6" aria-label="Primary navigation">
+            {navItems.map((item) => (
+              <Link
+                href={item.href}
+                key={item.href}
+                className={`font-label text-sm font-black uppercase transition-colors hover:text-tertiary-fixed ${
+                  pathname === item.href ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
         {/* Right Side: Account and Tickets */}
-        <div className="flex items-center gap-3 relative" ref={dropdownRef}>
-          <Link href="/ticket">
-            <button className="railroad-border flex h-11 items-center gap-2 bg-[#1c1b1b] px-4 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer">
+        <div className="relative flex shrink-0 items-center gap-2 sm:gap-3" ref={dropdownRef}>
+          <Link href="/ticket" className="shrink-0">
+            <button className="railroad-border flex min-h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
               <Icon className="h-5 w-5" name="ticket" />
-              <span className="font-label text-sm font-black uppercase">My Tickets</span>
+              <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
             </button>
           </Link>
 
@@ -164,7 +157,7 @@ export function MainHeader() {
           <button
             aria-label="Account Settings"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex h-11 w-11 items-center justify-center rounded border-2 border-white bg-on-background text-tertiary-fixed hover:bg-secondary cursor-pointer transition-colors"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded border-2 border-white bg-on-background text-tertiary-fixed hover:bg-secondary cursor-pointer transition-colors"
           >
             {user ? (
               <span className="font-headline text-lg font-bold uppercase">
@@ -177,7 +170,7 @@ export function MainHeader() {
 
           {/* Account Dropdown Menu */}
           <div
-            className={`absolute right-0 top-14 z-50 w-72 border-4 border-on-background bg-background text-on-background p-6 shadow-[8px_8px_0_var(--tertiary-fixed)] transition-all ${
+            className={`absolute right-0 top-14 z-50 w-[min(18rem,calc(100vw-1.5rem))] border-4 border-on-background bg-background text-on-background p-4 shadow-[8px_8px_0_var(--tertiary-fixed)] transition-all sm:p-6 ${
               dropdownOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible pointer-events-none"
             }`}
           >
@@ -225,6 +218,26 @@ export function MainHeader() {
             )}
           </div>
         </div>
+        </div>
+
+        <nav
+          className="grid grid-cols-3 gap-2 border-t border-white/15 pt-2 lg:hidden"
+          aria-label="Primary navigation"
+        >
+          {navItems.map((item) => (
+            <Link
+              href={item.href}
+              key={item.href}
+              className={`flex min-h-10 items-center justify-center border-2 px-2 text-center font-label text-[11px] font-black uppercase leading-tight transition-colors sm:text-xs ${
+                pathname === item.href
+                  ? "border-tertiary-fixed bg-tertiary-fixed text-on-background"
+                  : "border-white/40 bg-white/5 text-white hover:border-tertiary-fixed hover:text-tertiary-fixed"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );
