@@ -25,9 +25,9 @@
   --color-surface-variant: #e5e2e1;
   --color-outline: #727784;
   --color-outline-variant: #c1c6d5;
-  --font-body-md: var(--font-vietnam);
-  --font-headline: var(--font-bricolage);
-  --font-label: var(--font-space);
+  --font-body-md: var(--font-vietnam, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+  --font-headline: var(--font-bricolage, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+  --font-label: var(--font-space, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 
 body {
@@ -38,15 +38,15 @@ body {
 }
 
 .font-headline {
-  font-family: var(--font-bricolage), sans-serif;
+  font-family: var(--font-bricolage, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 
 .font-label {
-  font-family: var(--font-space), sans-serif;
+  font-family: var(--font-space, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 
 .font-body-md {
-  font-family: var(--font-vietnam), sans-serif;
+  font-family: var(--font-vietnam, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 
 .hard-shadow-red {
