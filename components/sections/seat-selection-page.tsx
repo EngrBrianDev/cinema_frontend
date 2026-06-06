@@ -2,7 +2,7 @@ import { SeatTypeTabs } from "@/components/sections/seats/seat-type-tabs";
 
 export function SeatSelectionPage() {
   return (
-    <div className="space-y-12 w-full flex flex-col">
+    <div className="space-y-10 w-full flex flex-col pt-12 lg:pt-20">
       <div className="mx-auto w-full max-w-7xl px-4 md:px-12 relative">
         <div className="star-decoration absolute -left-4 -top-4 h-12 w-12 rotate-12 bg-tertiary-fixed opacity-80" />
         <div className="star-decoration absolute -top-8 right-16 hidden h-16 w-16 -rotate-12 bg-white opacity-25 md:block" />
