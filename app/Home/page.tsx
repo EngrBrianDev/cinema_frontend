@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MainFooter } from "@/components/layout/main-footer";
 import { MainHeader } from "@/components/layout/main-header";
 
 const posterSrc = "/image/cinema_ticket.jpg";
@@ -237,27 +238,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t-8 border-[#004e9f] bg-[#1c1b1b] px-4 py-10 text-white sm:px-5 md:px-10 md:py-12 xl:px-16">
-        <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-6 md:flex-row md:items-center">
-          <div>
-            <h2 className="font-headline text-2xl uppercase text-[#ffe16d] md:text-3xl">DA REUNION</h2>
-            <p className="mt-2 max-w-full font-label text-xs uppercase leading-relaxed tracking-[0.14em] text-white/55 sm:text-sm md:tracking-[0.2em]">
-              Philippine cinema classics fan experience
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-5 font-label text-sm font-black uppercase">
-            <a className="hover:text-[#ffe16d]" href="#">
-              Home
-            </a>
-            <a className="hover:text-[#ffe16d]" href="#">
-              Schedule
-            </a>
-            <a className="hover:text-[#ffe16d]" href="#">
-              Contact
-            </a>
-          </div>
-        </div>
-      </footer>
+      <MainFooter />
 
       <button
         aria-label="Add tickets to cart"

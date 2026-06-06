@@ -21,7 +21,7 @@ const vietnam = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "DA REUNION",
+  title: "Inspire Cinema",
   description: "Cinema booking and ticket management",
 };
 
