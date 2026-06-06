@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { MainFooter } from "@/components/layout/main-footer";
 import { MainHeader } from "@/components/layout/main-header";
 
@@ -153,12 +154,18 @@ export default function Home() {
                 the laughter, the &quot;riles&quot; life, and the classic Pinoy humor that defined a generation.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row md:mt-10 lg:justify-start">
-                <button className="min-h-14 w-full border-4 border-[#1c1b1b] bg-[#bb0014] px-5 py-4 font-headline text-base uppercase tracking-[0.1em] text-white shadow-[7px_7px_0_#1c1b1b] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-7 md:px-9 md:py-5 md:text-xl md:tracking-[0.14em]">
+                <Link
+                  href="/seats"
+                  className="inline-flex min-h-14 w-full items-center justify-center border-4 border-[#1c1b1b] bg-[#bb0014] px-5 py-4 text-center font-headline text-base uppercase tracking-[0.1em] text-white shadow-[7px_7px_0_#1c1b1b] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-7 md:px-9 md:py-5 md:text-xl md:tracking-[0.14em]"
+                >
                   Buy Tickets Now
-                </button>
-                <button className="min-h-14 w-full border-4 border-[#1c1b1b] bg-[#004e9f] px-5 py-4 font-headline text-base uppercase tracking-[0.1em] text-white shadow-[7px_7px_0_#ffe16d] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-7 md:px-9 md:py-5 md:text-xl md:tracking-[0.14em]">
+                </Link>
+                <a
+                  href="https://youtu.be/mwEGtZ17aao?si=F0gdvxmozWUsxoPK"
+                  className="inline-flex min-h-14 w-full items-center justify-center border-4 border-[#1c1b1b] bg-[#004e9f] px-5 py-4 text-center font-headline text-base uppercase tracking-[0.1em] text-white shadow-[7px_7px_0_#ffe16d] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-7 md:px-9 md:py-5 md:text-xl md:tracking-[0.14em]"
+                >
                   View Trailer
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -227,12 +234,12 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-col gap-4 sm:flex-row lg:flex-col lg:gap-5">
-              <button className="min-h-14 flex-1 border-4 border-[#1c1b1b] bg-[#ffe16d] px-5 py-4 font-headline text-base uppercase tracking-[0.08em] text-[#221b00] shadow-[7px_7px_0_#1c1b1b] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none md:px-8 md:py-5 md:text-2xl md:tracking-[0.12em]">
+              <Link
+                href="/seats"
+                className="inline-flex min-h-14 flex-1 items-center justify-center border-4 border-[#1c1b1b] bg-[#ffe16d] px-5 py-4 text-center font-headline text-base uppercase tracking-[0.08em] text-[#221b00] shadow-[7px_7px_0_#1c1b1b] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none md:px-8 md:py-5 md:text-2xl md:tracking-[0.12em]"
+              >
                 View Seat Map
-              </button>
-              <button className="min-h-14 flex-1 border-4 border-white bg-[#1c1b1b] px-5 py-4 font-headline text-base uppercase tracking-[0.08em] text-[#ffe16d] transition-transform hover:scale-[1.02] md:px-8 md:py-5 md:text-2xl md:tracking-[0.12em]">
-                Learn More
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -240,12 +247,6 @@ export default function Home() {
 
       <MainFooter />
 
-      <button
-        aria-label="Add tickets to cart"
-        className="fixed bottom-8 right-8 z-40 hidden h-20 w-20 items-center justify-center rounded-full border-4 border-[#1c1b1b] bg-[#ffe16d] text-[#221b00] shadow-[8px_8px_0_#bb0014] transition-transform hover:scale-105 lg:flex"
-      >
-        <Icon className="h-9 w-9" name="cart" />
-      </button>
     </div>
   );
 }
