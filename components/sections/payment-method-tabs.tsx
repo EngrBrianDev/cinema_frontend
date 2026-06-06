@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import {
+  releasePendingPaypalReservations,
+  savePendingPaypalReservationIds,
+} from "@/lib/checkout-reservations";
 import { useAuth } from "@/context/auth-context";
 
 const methods = ["gcash", "card"] as const;
@@ -27,6 +31,7 @@ export function PaymentMethodTabs() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalBody, setModalBody] = useState("");
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -77,21 +82,24 @@ export function PaymentMethodTabs() {
 
     setIsSubmitting(true);
     setError(null);
+    let createdReservationIds: string[] = [];
 
     try {
-      // Step 1: Create a reservation for each seat sequentially or in parallel
-      const reservationPromises = summary.seatIds.map((seatId: string, idx: number) => {
+      // Step 1: Create reservations sequentially so partial holds can be released on failure.
+      const reservationResults = [];
+      for (let idx = 0; idx < summary.seatIds.length; idx++) {
         const seatLabel = summary.selectedSeats[idx];
-        return apiFetch("/reservations", {
+        const reservation = await apiFetch("/reservations", {
           method: "POST",
           body: {
             cinemaId: summary.cinemaId,
             seatNumber: seatLabel,
           },
         });
-      });
+        reservationResults.push(reservation);
+        createdReservationIds.push(reservation.id);
+      }
 
-      const reservationResults = await Promise.all(reservationPromises);
       const resIds = reservationResults.map((r: any) => r.id);
 
       // Step 2: Charge / Submit receipt
@@ -121,6 +129,7 @@ export function PaymentMethodTabs() {
         });
 
         if (result.approvalLink) {
+          savePendingPaypalReservationIds(resIds);
           // Redirect the browser window directly to PayPal hosted payment page
           window.location.href = result.approvalLink;
         } else {
@@ -128,6 +137,16 @@ export function PaymentMethodTabs() {
         }
       }
     } catch (err: any) {
+      if (createdReservationIds.length > 0) {
+        try {
+          await apiFetch("/reservations/cancel", {
+            method: "POST",
+            body: { reservationIds: createdReservationIds },
+          });
+        } catch (releaseErr) {
+          console.error("Failed to release pending reservations after payment error:", releaseErr);
+        }
+      }
       console.error("Payment submission failed:", err);
       setError(err.message || "An unexpected error occurred. Please try again.");
     } finally {
@@ -138,10 +157,24 @@ export function PaymentMethodTabs() {
   const handleModalClose = () => {
     setModalOpen(false);
     localStorage.removeItem("checkout_summary");
+    sessionStorage.removeItem("checkout_entry_allowed");
     router.push("/");
   };
 
+  const handleConfirmCancel = async () => {
+    setCancelModalOpen(false);
+    try {
+      await releasePendingPaypalReservations();
+    } catch (err) {
+      console.error("Failed to release pending PayPal reservations:", err);
+    }
+    localStorage.removeItem("checkout_summary");
+    sessionStorage.removeItem("checkout_entry_allowed");
+    router.push("/seats");
+  };
+
   const totalAmount = summary ? summary.total : 0;
+  const paymentTabsLocked = isSubmitting;
 
   return (
     <div className="space-y-6">
@@ -160,12 +193,16 @@ export function PaymentMethodTabs() {
               setMethod(item);
               setError(null);
             }}
-            disabled={isSubmitting}
-            className={`border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
-              method === item
-                ? "bg-secondary text-white border-on-background"
-                : "bg-surface-variant border-outline hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background"
-            }`}
+            disabled={paymentTabsLocked}
+            aria-disabled={paymentTabsLocked}
+            className={[
+              "border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+              paymentTabsLocked
+                ? "cursor-not-allowed border-outline-variant bg-on-background/10 text-outline opacity-50 shadow-none"
+                : method === item
+                  ? "bg-secondary text-white border-on-background"
+                  : "bg-surface-variant border-outline hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background",
+            ].join(" ")}
           >
             {item === "gcash" ? "GCash QR" : "PayPal / Card"}
           </button>
@@ -289,6 +326,15 @@ export function PaymentMethodTabs() {
           : (method === "card" ? "Proceed to PayPal" : "Complete Payment")}
       </button>
 
+      <button
+        type="button"
+        onClick={() => setCancelModalOpen(true)}
+        disabled={isSubmitting}
+        className="w-full border-4 border-on-background bg-background p-3 font-headline text-sm font-extrabold uppercase tracking-wide text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-surface-variant hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+      >
+        Cancel Checkout
+      </button>
+
       {/* Success Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
@@ -309,6 +355,47 @@ export function PaymentMethodTabs() {
             >
               Back to Movies
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {cancelModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+            <div className="border-b-4 border-on-background pb-3">
+              <p className="font-label text-[10px] font-black uppercase text-outline">
+                Cancel Checkout
+              </p>
+              <h3 className="mt-1 font-headline text-xl font-black uppercase text-secondary">
+                Are you sure?
+              </h3>
+            </div>
+
+            <p className="font-body-md text-sm leading-relaxed text-on-background">
+              You're one step closer to having your ticket. If you cancel now, this checkout will be cleared and you'll need to choose your seats again.
+            </p>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setCancelModalOpen(false)}
+                className="border-4 border-on-background bg-tertiary-fixed p-3 font-headline text-xs font-extrabold uppercase text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              >
+                Continue Checkout
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                className="border-4 border-on-background bg-secondary p-3 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              >
+                Yes, Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
