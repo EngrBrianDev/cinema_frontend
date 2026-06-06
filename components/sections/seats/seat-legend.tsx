@@ -11,8 +11,8 @@ export function SeatLegend({ showPwd }: { showPwd?: boolean }) {
       </div>
       <div className="flex items-center gap-2">
         <div className="flex h-6 w-6 items-center justify-center rounded-sm border-2 border-outline-variant bg-on-background/10 opacity-35">
-          <span className="material-symbols-outlined text-outline" style={{ fontSize: 10 }}>
-            close
+          <span className="text-outline text-[10px] font-black leading-none">
+            ✕
           </span>
         </div>
         <span className="font-label text-xs uppercase text-outline-variant">Reserved</span>
