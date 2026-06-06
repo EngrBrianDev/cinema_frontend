@@ -28,15 +28,19 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
 
   // 3. Encrypt payload for write requests if not bypassed
   if (["POST", "PUT", "PATCH"].includes(method) && requestBody) {
-    headers.set("Content-Type", "application/json");
-    
-    if (!DISABLE_API_ENCRYPTION) {
-      // Encrypt the request payload
-      const encrypted = await encryptPayload(requestBody);
-      requestBody = JSON.stringify(encrypted);
+    if (requestBody instanceof FormData) {
+      // Let browser set content-type with boundary automatically for FormData
     } else {
-      // Send plain JSON
-      requestBody = JSON.stringify(requestBody);
+      headers.set("Content-Type", "application/json");
+      
+      if (!DISABLE_API_ENCRYPTION) {
+        // Encrypt the request payload
+        const encrypted = await encryptPayload(requestBody);
+        requestBody = JSON.stringify(encrypted);
+      } else {
+        // Send plain JSON
+        requestBody = JSON.stringify(requestBody);
+      }
     }
   }
 
