@@ -1,15 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PaymentMethodTabs } from "@/components/sections/payment-method-tabs";
 import { HardShadowCard } from "@/components/ui/hard-shadow-card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { checkoutSummary as mockSummary } from "@/lib/mock-data/cinema-data";
 import { useAuth } from "@/context/auth-context";
+import { apiFetch } from "@/lib/api";
 
 export function CheckoutPage() {
   const [summary, setSummary] = useState<any>(null);
   const { user, loginWithGoogle, loading: authLoading } = useAuth();
+  
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Capture states
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [captureSuccess, setCaptureSuccess] = useState(false);
+  const [cancelWarning, setCancelWarning] = useState<string | null>(null);
+
+  // Success Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalBody, setModalBody] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -23,6 +39,61 @@ export function CheckoutPage() {
       }
     }
   }, []);
+
+  // Check URL parameters for PayPal transaction callback
+  useEffect(() => {
+    const success = searchParams.get("payment_success");
+    const cancel = searchParams.get("payment_cancel");
+    const token = searchParams.get("token"); // PayPal Order ID
+
+    if (success === "true" && token) {
+      handlePaypalCapture(token);
+    } else if (cancel === "true") {
+      setCancelWarning("Payment was cancelled on PayPal. You may try again or choose another method.");
+      // Clean query parameters from URL
+      router.replace("/checkout");
+    }
+  }, [searchParams]);
+
+  const handlePaypalCapture = async (paypalOrderId: string) => {
+    // Prevent double invocation
+    if (isCapturing || captureSuccess) return;
+
+    setIsCapturing(true);
+    setCaptureError(null);
+    setCancelWarning(null);
+
+    try {
+      const result = await apiFetch("/payments/paypal/capture", {
+        method: "POST",
+        body: {
+          paypalOrderId,
+        },
+      });
+
+      setCaptureSuccess(true);
+      const ticketNums = result.tickets.map((t: any) => t.ticketNumber).join(", ");
+      
+      setModalTitle("Payment Successful!");
+      setModalBody(`Thank you! Your payment has been processed successfully.\n\nDigital ticket(s) ${ticketNums} has been sent to your email.`);
+      setModalOpen(true);
+
+      // Clear summary from local storage
+      localStorage.removeItem("checkout_summary");
+    } catch (err: any) {
+      console.error("PayPal Capture failed:", err);
+      setCaptureError(err.message || "Failed to confirm payment with PayPal. Please try again.");
+    } finally {
+      setIsCapturing(false);
+      // Clean query parameters from URL
+      router.replace("/checkout");
+    }
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    router.push("/");
+  };
 
   // Google sign in rendering inside CheckoutPage when user is logged out
   useEffect(() => {
@@ -72,6 +143,25 @@ export function CheckoutPage() {
     );
   }
 
+  // Display capture loading state
+  if (isCapturing) {
+    return (
+      <div className="mx-auto w-full max-w-md px-4 py-24">
+        <HardShadowCard shadow="yellow">
+          <div className="p-6 text-center space-y-6 flex flex-col items-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+            <h2 className="font-headline text-2xl font-black uppercase text-secondary">
+              Confirming Payment
+            </h2>
+            <p className="font-body-md text-sm text-outline max-w-xs leading-relaxed">
+              We are verifying and finalizing your transaction with PayPal. Please do not close this window or navigate away.
+            </p>
+          </div>
+        </HardShadowCard>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="mx-auto w-full max-w-md px-4 py-16">
@@ -88,8 +178,21 @@ export function CheckoutPage() {
             <p className="font-body-md text-sm text-outline max-w-xs">
               You must be signed in with Google to view your order summary and complete your secure checkout.
             </p>
-            <div className="border-t-2 border-on-background/10 pt-6 flex justify-center w-full">
+            <div className="border-t-2 border-on-background/10 pt-6 flex flex-col items-center gap-3 w-full">
               <div id="google-checkout-signin-btn" className="w-full flex justify-center"></div>
+              
+              <button
+                onClick={async () => {
+                  try {
+                    await loginWithGoogle("dev-token-customer");
+                  } catch (err: any) {
+                    alert(`Authentication failed: ${err.message || err}`);
+                  }
+                }}
+                className="w-full max-w-[280px] border-4 border-on-background bg-tertiary-fixed py-2.5 font-headline text-xs font-bold uppercase shadow-[2px_2px_0_0_#1c1b1b] hover:bg-[#ffe88f] cursor-pointer"
+              >
+                Use Dev Login
+              </button>
             </div>
           </div>
         </HardShadowCard>
@@ -106,6 +209,19 @@ export function CheckoutPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8">
       <SectionTitle title="Secure Checkout" subtitle="Choose your payment method and complete your booking." />
+      
+      {captureError && (
+        <div className="border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
+          ⚠️ {captureError}
+        </div>
+      )}
+
+      {cancelWarning && (
+        <div className="border-4 border-amber-500 bg-amber-500/10 p-4 font-body-md text-sm text-amber-600 font-bold shadow-[2px_2px_0_0_#1c1b1b]">
+          ⚠️ {cancelWarning}
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <HardShadowCard shadow="black">
@@ -125,10 +241,12 @@ export function CheckoutPage() {
                 <span className="font-label text-xs uppercase opacity-75">Subtotal:</span>
                 <span className="font-bold">₱{displaySubtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between border-b border-on-background/10 pb-2">
-                <span className="font-label text-xs uppercase opacity-75">Service Fee:</span>
-                <span className="font-bold">₱{displayServiceFee.toFixed(2)}</span>
-              </div>
+              {displayServiceFee > 0 && (
+                <div className="flex justify-between border-b border-on-background/10 pb-2">
+                  <span className="font-label text-xs uppercase opacity-75">Service Fee:</span>
+                  <span className="font-bold">₱{displayServiceFee.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex items-end justify-between pt-2">
                 <span className="font-label text-sm font-bold uppercase">Total Amount:</span>
                 <span className="font-headline text-3xl font-extrabold text-secondary">
@@ -144,6 +262,30 @@ export function CheckoutPage() {
           </HardShadowCard>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+            <div className="flex items-center justify-between border-b-4 border-on-background pb-3">
+              <h3 className="font-headline text-xl font-black uppercase text-secondary">
+                {modalTitle}
+              </h3>
+            </div>
+            
+            <p className="font-body-md text-sm text-on-background leading-relaxed whitespace-pre-line">
+              {modalBody}
+            </p>
+
+            <button
+              onClick={handleModalClose}
+              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+            >
+              Back to Movies
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

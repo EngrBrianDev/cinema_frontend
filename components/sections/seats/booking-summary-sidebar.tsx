@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const PAYMENT_METHODS = ["gcash", "maya", "card"] as const;
+const PAYMENT_METHODS = ["gcash", "card"] as const;
 type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export interface SelectedSeatChip {
@@ -18,6 +18,7 @@ interface BookingSummarySidebarProps {
   selectedSeats: SelectedSeatChip[];
   onRemoveSeat: (id: string) => void;
   seatTypeLabel: string;
+  cinemaId: string | undefined;
 }
 
 export function BookingSummarySidebar({
@@ -27,6 +28,7 @@ export function BookingSummarySidebar({
   selectedSeats,
   onRemoveSeat,
   seatTypeLabel,
+  cinemaId,
 }: BookingSummarySidebarProps) {
   const [payment, setPayment] = useState<PaymentMethod>("gcash");
   const router = useRouter();
@@ -37,10 +39,11 @@ export function BookingSummarySidebar({
         selectedSeats: selectedSeats.map((s) => s.label),
         seatIds: selectedSeats.map((s) => s.id),
         subtotal: total,
-        serviceFee: selectedCount * 50.0,
-        total: total + selectedCount * 50.0,
+        serviceFee: 0,
+        total: total,
         seatTypeLabel,
         paymentMethod: payment,
+        cinemaId,
       };
       localStorage.setItem("checkout_summary", JSON.stringify(summary));
       router.push("/checkout");
@@ -81,7 +84,7 @@ export function BookingSummarySidebar({
             {/* Payment Method Option */}
             <div className="flex flex-col gap-0.5 flex-1 max-w-[150px]">
               <span className="font-label text-[8px] uppercase font-extrabold opacity-75">Payment</span>
-              <div className="grid grid-cols-3 gap-1">
+              <div className="grid grid-cols-2 gap-1">
                 {PAYMENT_METHODS.map((method) => (
                   <button
                     key={method}
@@ -93,7 +96,7 @@ export function BookingSummarySidebar({
                         : "border-outline bg-background text-on-background"
                     }`}
                   >
-                    {method === "gcash" ? "GC" : method === "maya" ? "MY" : "CRD"}
+                    {method === "gcash" ? "GC" : "CRD"}
                   </button>
                 ))}
               </div>
@@ -154,29 +157,30 @@ export function BookingSummarySidebar({
           {/* Middle Section: Payment Methods */}
           <div className="flex flex-col gap-2 min-w-[240px]">
             <p className="font-label text-[10px] uppercase font-extrabold opacity-75 select-none">Choose Payment Method</p>
-            <div className="grid grid-cols-3 gap-2">
-              {PAYMENT_METHODS.map((method) => (
-                <label key={method} className="cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`payment-${seatTypeLabel}`}
-                    checked={payment === method}
-                    onChange={() => setPayment(method)}
-                    className="hidden"
-                  />
-                  <div
-                    className={[
-                      "border-2 py-2 text-center font-label text-xs font-bold uppercase transition-all select-none",
-                      payment === method
-                        ? "border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b]"
-                        : "border-outline bg-background text-on-background hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-none",
-                    ].join(" ")}
-                  >
-                    {method === "gcash" ? "GCash" : method === "maya" ? "Maya" : "Card"}
-                  </div>
-                </label>
-              ))}
-            </div>
+             <div className="grid grid-cols-2 gap-2">
+               {PAYMENT_METHODS.map((method) => (
+                 <label key={method} className="cursor-pointer">
+                   <input
+                     type="radio"
+                     name={`payment-${seatTypeLabel}`}
+                     value={method}
+                     checked={payment === method}
+                     onChange={() => setPayment(method)}
+                     className="hidden"
+                   />
+                   <div
+                     className={[
+                       "border-2 py-2 text-center font-label text-xs font-bold uppercase transition-all select-none",
+                       payment === method
+                         ? "border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b]"
+                         : "border-outline bg-background text-on-background hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-none",
+                     ].join(" ")}
+                   >
+                     {method === "gcash" ? "GCash" : "Card"}
+                   </div>
+                 </label>
+               ))}
+             </div>
           </div>
 
           {/* Right Section: Pricing & Checkout CTA */}

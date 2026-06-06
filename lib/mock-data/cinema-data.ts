@@ -16,8 +16,8 @@ export const buyers: Buyer[] = [
 
 export const checkoutSummary: PaymentSummary = {
   subtotal: 1050,
-  serviceFee: 45,
-  total: 1095,
+  serviceFee: 0,
+  total: 1050,
 };
 
 export const confirmedTicket: TicketInfo = {

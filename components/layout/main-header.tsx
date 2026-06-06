@@ -220,9 +220,23 @@ export function MainHeader() {
                 <p className="font-headline text-base font-bold uppercase text-on-background text-center">
                   Sign in to book seats
                 </p>
-                <div className="border-t-2 border-on-background/10 pt-4 flex justify-center">
+                <div className="border-t-2 border-on-background/10 pt-4 flex flex-col gap-2 items-center">
                   {/* Container for Google Render Button - always rendered to prevent DOM find failures */}
                   <div id="google-signin-btn" className="w-full flex justify-center"></div>
+                  
+                  <button
+                    onClick={async () => {
+                      try {
+                        await loginWithGoogle("dev-token-customer");
+                        setDropdownOpen(false);
+                      } catch (err: any) {
+                        alert(`Authentication failed: ${err.message || err}`);
+                      }
+                    }}
+                    className="w-full border-2 border-on-background bg-tertiary-fixed py-2 font-label text-xs font-black uppercase text-on-background hover:bg-[#ffe88f] cursor-pointer"
+                  >
+                    Use Dev Login
+                  </button>
                 </div>
               </div>
             )}

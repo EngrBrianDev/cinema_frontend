@@ -447,7 +447,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
                   <div>
                     <label className="block font-label text-[10px] uppercase font-bold text-outline mb-1">Row</label>
                     <select
-                      value={currentRowLabel}
+                      value={currentRowLabel || ""}
                       onChange={(e) => {
                         const newRow = e.target.value;
                         if (!newRow) {
@@ -472,7 +472,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
                     <label className="block font-label text-[10px] uppercase font-bold text-outline mb-1">Seat</label>
                     <select
                       disabled={!currentRowLabel}
-                      value={currentSeatCode}
+                      value={currentSeatCode || ""}
                       onChange={(e) => handleSlotChange(index, e.target.value)}
                       className="w-full border-2 border-on-background bg-background px-2 py-1.5 font-headline text-xs font-bold focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -550,6 +550,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         selectedSeats={selectedSeats}
         onRemoveSeat={removeById}
         seatTypeLabel={config.label}
+        cinemaId={cinemaId}
       />
     </div>
   );
