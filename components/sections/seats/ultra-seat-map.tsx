@@ -351,7 +351,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
 
   if (loading) {
     return (
-      <div className="flex h-16 items-center justify-center sm:h-64">
+      <div className="flex h-64 items-center justify-center">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
       </div>
     );

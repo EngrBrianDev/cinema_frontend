@@ -121,7 +121,7 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden bg-[#fcf9f8] text-[#1c1b1b]">
       <MainHeader />
 
-      <main className="pt-36 lg:pt-20">
+      <main className="pt-[7.5rem] lg:pt-20">
         <section className="relative border-b-4 border-[#1c1b1b] bg-[linear-gradient(120deg,#fff8eb_0%,#fcf9f8_52%,#ffe16d_52%,#ffe16d_54%,#fcf9f8_54%)]">
           <div className="mx-auto grid max-w-[1440px] items-center gap-8 px-4 py-8 sm:px-5 md:gap-12 md:px-10 md:py-12 lg:min-h-[720px] lg:grid-cols-[0.92fr_1.08fr] lg:py-14 xl:px-16">
             <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px]">
@@ -144,9 +144,8 @@ export default function Home() {
               <p className="mb-4 inline-flex max-w-full border-2 border-[#1c1b1b] bg-white px-3 py-2 font-label text-[10px] font-black uppercase leading-snug tracking-[0.12em] text-[#bb0014] shadow-[4px_4px_0_#ffe16d] sm:text-xs sm:tracking-[0.18em] md:mb-5 md:tracking-[0.22em]">
                 One-night-only reunion screening
               </p>
-              <h2 className="font-headline text-[clamp(2.1rem,11vw,7rem)] font-black uppercase leading-[0.9] tracking-normal text-[#004e9f] sm:text-[clamp(2.25rem,13vw,7rem)]">
-                <span className="block sm:inline">Home</span>
-                <span className="block sm:inline"> Along</span>
+              <h2 className="font-headline text-[clamp(2.25rem,13vw,7rem)] font-black uppercase leading-[0.9] tracking-normal text-[#004e9f]">
+                Home Along
                 <br />
                 <span className="text-[#bb0014] italic">Da Riles</span>
               </h2>
