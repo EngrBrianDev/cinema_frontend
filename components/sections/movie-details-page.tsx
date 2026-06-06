@@ -5,7 +5,7 @@ import { SectionTitle } from "@/components/ui/section-title";
 
 export function MovieDetailsPage() {
   return (
-    <div className="space-y-10">
+    <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-10">
       <SectionTitle
         title="HOME ALONG DA RILES"
         subtitle="The ultimate nostalgic comeback. One-night-only reunion screening."

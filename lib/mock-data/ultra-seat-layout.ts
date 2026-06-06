@@ -5,16 +5,15 @@ export interface UltraSeatCell {
 
 export type UltraSlot =
   | { kind: "blank" }
-  | { kind: "label"; row: string }
   | { kind: "aisle"; size: "large" | "small" }
   | { kind: "seat"; seat: UltraSeatCell };
 
-/** Shared 19-column track so every row aligns vertically */
+/** 20-column track: extL×2 | gap | 10,9 | aisle | 8,7 | gap | 6,5 | gap | 4,3 | aisle | 2,1 | gap | extR×2 */
 function standardRowSlots(row: string): UltraSlot[] {
   return [
     { kind: "blank" },
     { kind: "blank" },
-    { kind: "label", row },
+    { kind: "aisle", size: "small" },
     { kind: "seat", seat: { key: `${row}10`, label: `${row}10` } },
     { kind: "seat", seat: { key: `${row}9`, label: `${row}9` } },
     { kind: "aisle", size: "large" },
@@ -29,6 +28,7 @@ function standardRowSlots(row: string): UltraSlot[] {
     { kind: "aisle", size: "large" },
     { kind: "seat", seat: { key: `${row}2`, label: `${row}2` } },
     { kind: "seat", seat: { key: `${row}1`, label: `${row}1` } },
+    { kind: "aisle", size: "small" },
     { kind: "blank" },
     { kind: "blank" },
   ];
@@ -43,23 +43,24 @@ export const ultraStandardRowSlots: UltraSlot[][] = "ABCDEFG".split("").map(stan
 export const ultraRowHSlots: UltraSlot[] = [
   { kind: "seat", seat: { key: "H12", label: "H12" } },
   { kind: "seat", seat: { key: "H11", label: "H11" } },
-  { kind: "label", row: "H" },
-  { kind: "seat", seat: { key: "H10-podL", label: "H10" } },
-  { kind: "seat", seat: { key: "H-G9", label: "G9" } },
-  { kind: "aisle", size: "large" },
-  { kind: "seat", seat: { key: "H10-podCL", label: "H10" } },
-  { kind: "seat", seat: { key: "H9", label: "H9" } },
   { kind: "aisle", size: "small" },
-  { kind: "seat", seat: { key: "H8", label: "H8" } },
-  { kind: "seat", seat: { key: "H7", label: "H7" } },
-  { kind: "aisle", size: "small" },
-  { kind: "seat", seat: { key: "H6", label: "H6" } },
-  { kind: "seat", seat: { key: "H5", label: "H5" } },
+  { kind: "seat", seat: { key: "H10", label: "H10" } },
+  { kind: "seat", seat: { key: "H9", label: "G9" } },
   { kind: "aisle", size: "large" },
-  { kind: "seat", seat: { key: "H4", label: "H4" } },
-  { kind: "seat", seat: { key: "H3", label: "H3" } },
-  { kind: "seat", seat: { key: "H2", label: "H2" } },
-  { kind: "seat", seat: { key: "H1", label: "H1" } },
+  { kind: "seat", seat: { key: "H8", label: "H10" } },
+  { kind: "seat", seat: { key: "H7", label: "H9" } },
+  { kind: "aisle", size: "small" },
+  { kind: "seat", seat: { key: "H6", label: "H8" } },
+  { kind: "seat", seat: { key: "H5", label: "H7" } },
+  { kind: "aisle", size: "small" },
+  { kind: "seat", seat: { key: "H4", label: "H6" } },
+  { kind: "seat", seat: { key: "H3", label: "H5" } },
+  { kind: "aisle", size: "large" },
+  { kind: "seat", seat: { key: "H2", label: "H4" } },
+  { kind: "seat", seat: { key: "H1", label: "H3" } },
+  { kind: "aisle", size: "small" },
+  { kind: "seat", seat: { key: "H2_ext", label: "H2" } },
+  { kind: "seat", seat: { key: "H1_ext", label: "H1" } },
 ];
 
 export const ultraAllRowSlots = [...ultraStandardRowSlots, ultraRowHSlots];
