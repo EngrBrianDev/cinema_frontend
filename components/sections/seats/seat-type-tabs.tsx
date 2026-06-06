@@ -20,9 +20,8 @@ export function SeatTypeTabs() {
       try {
         const data = await apiFetch("/cinemas");
         setCinemas(data);
-      } catch (err: any) {
-        console.error("Failed to load cinemas:", err);
-        setError(err.message || "Failed to load cinema configurations.");
+      } catch {
+        setError("We couldn't load the cinema data right now. Please refresh or try again.");
       } finally {
         setLoading(false);
       }
@@ -45,6 +44,13 @@ export function SeatTypeTabs() {
       <div className="rounded-sm border-4 border-secondary bg-surface-variant p-6 text-center text-on-background shadow-[4px_4px_0_0_#1c1b1b]">
         <p className="font-headline text-lg font-bold text-secondary">Error Connection</p>
         <p className="mt-2 text-sm opacity-80">{error}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-4 border-4 border-on-background bg-secondary px-5 py-2 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+        >
+          Retry
+        </button>
       </div>
     );
   }
