@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { eventSchedule } from "@/lib/mock-data/cinema-data";
 import { HardShadowCard } from "@/components/ui/hard-shadow-card";
-import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionTitle } from "@/components/ui/section-title";
 
 export function MovieDetailsPage() {
@@ -26,7 +26,12 @@ export function MovieDetailsPage() {
           <p className="font-label text-xs uppercase text-outline">Venue</p>
           <h3 className="mt-2 font-headline text-3xl font-extrabold uppercase">Cinema 2</h3>
           <p className="mt-2">Uptown Mall, BGC</p>
-          <PrimaryButton className="mt-6 w-full">Buy Tickets Now</PrimaryButton>
+          <Link
+            href="/seats"
+            className="mt-6 inline-flex w-full items-center justify-center rounded border-2 border-black bg-secondary px-5 py-3 text-center font-headline text-sm font-bold uppercase text-white"
+          >
+            Buy Tickets Now
+          </Link>
         </HardShadowCard>
       </div>
     </div>
