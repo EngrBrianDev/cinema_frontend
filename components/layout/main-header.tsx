@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
@@ -124,10 +125,19 @@ export function MainHeader() {
         <div className="flex min-h-14 items-center justify-between gap-2 sm:gap-4 lg:min-h-0 lg:flex-1">
         {/* Left Side: Brand and Links */}
         <div className="flex min-w-0 items-center gap-4 lg:gap-7">
-          <Link href="/" className="min-w-0 shrink">
-            <h1 className="max-w-[45vw] truncate font-serif text-[clamp(1rem,5vw,1.5rem)] font-bold uppercase tracking-[0.08em] text-tertiary-fixed transition-colors hover:text-yellow-300 sm:max-w-none sm:tracking-[0.14em] lg:tracking-[0.19em]">
-              Inspire Cinema
-              </h1>
+          <Link
+            href="/"
+            className="shrink-0 overflow-hidden rounded-lg bg-white p-1 shadow-sm transition-transform hover:scale-[1.03]"
+            aria-label="Inspire Cinema home"
+          >
+            <Image
+              src="/image/cinemalogo.png"
+              alt="Inspire Cinema"
+              width={1659}
+              height={948}
+              priority
+              className="h-auto w-16 rounded-md object-contain sm:w-20 lg:w-20"
+            />
           </Link>
           <nav className="hidden items-center gap-4 lg:flex lg:gap-6" aria-label="Primary navigation">
             {navItems.map((item) => (
