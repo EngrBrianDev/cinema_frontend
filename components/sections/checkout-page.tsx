@@ -343,7 +343,7 @@ export function CheckoutPage() {
   const seatTypeLabel = summary.seatTypeLabel;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8 overflow-x-hidden pt-10 lg:pt-8">
       <SectionTitle title="Secure Checkout" subtitle="Choose your payment method and complete your booking." />
       
       {captureError && (
@@ -352,8 +352,8 @@ export function CheckoutPage() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-5">
+      <div className="grid gap-6 lg:grid-cols-12 w-full min-w-0">
+        <div className="space-y-6 lg:col-span-5 min-w-0 overflow-hidden">
           <HardShadowCard shadow="black">
             <p className="font-label text-xs uppercase text-outline">Order Summary</p>
             <div className="mt-4 space-y-3">
@@ -389,7 +389,7 @@ export function CheckoutPage() {
             <CheckoutSeatPreview selectedSeats={summary.selectedSeats} seatTypeLabel={seatTypeLabel} />
           </HardShadowCard>
         </div>
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 min-w-0 overflow-hidden">
           <HardShadowCard shadow="yellow">
             <PaymentMethodTabs />
           </HardShadowCard>
