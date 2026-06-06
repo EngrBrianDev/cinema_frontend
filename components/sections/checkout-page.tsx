@@ -2,16 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { CheckoutSeatPreview } from "@/components/sections/checkout-seat-preview";
 import { PaymentMethodTabs } from "@/components/sections/payment-method-tabs";
 import { HardShadowCard } from "@/components/ui/hard-shadow-card";
 import { SectionTitle } from "@/components/ui/section-title";
-import { checkoutSummary as mockSummary } from "@/lib/mock-data/cinema-data";
 import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api";
-import Link from "next/link";
+import {
+  clearPendingPaypalReservationIds,
+  getUnavailableSelectedSeats,
+  getPendingPaypalReservationIds,
+  releasePendingPaypalReservations,
+} from "@/lib/checkout-reservations";
 
 export function CheckoutPage() {
   const [summary, setSummary] = useState<any>(null);
+  const [summaryChecked, setSummaryChecked] = useState(false);
   const { user, loginWithGoogle, loading: authLoading } = useAuth();
   
   const searchParams = useSearchParams();
@@ -22,6 +28,8 @@ export function CheckoutPage() {
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [captureSuccess, setCaptureSuccess] = useState(false);
   const [cancelWarning, setCancelWarning] = useState<string | null>(null);
+  const [unavailableSeats, setUnavailableSeats] = useState<string[]>([]);
+  const [seatUnavailableModalOpen, setSeatUnavailableModalOpen] = useState(false);
 
   // Success Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -30,31 +38,123 @@ export function CheckoutPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const checkoutEntryAllowed = sessionStorage.getItem("checkout_entry_allowed") === "true";
       const stored = localStorage.getItem("checkout_summary");
-      if (stored) {
+      if (checkoutEntryAllowed && stored) {
         try {
-          setSummary(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          const hasSeats =
+            Array.isArray(parsed.selectedSeats) &&
+            parsed.selectedSeats.length > 0 &&
+            Array.isArray(parsed.seatIds) &&
+            parsed.seatIds.length > 0;
+
+          if (hasSeats) {
+            setSummary(parsed);
+          } else {
+            localStorage.removeItem("checkout_summary");
+            sessionStorage.removeItem("checkout_entry_allowed");
+            router.replace("/seats");
+          }
         } catch (e) {
           console.error("Failed to parse checkout summary:", e);
+          localStorage.removeItem("checkout_summary");
+          sessionStorage.removeItem("checkout_entry_allowed");
+          router.replace("/seats");
         }
+      } else {
+        localStorage.removeItem("checkout_summary");
+        sessionStorage.removeItem("checkout_entry_allowed");
+        router.replace("/seats");
       }
+      setSummaryChecked(true);
     }
-  }, []);
+  }, [router]);
+
+  useEffect(() => {
+    if (!summaryChecked || !summary) return;
+
+    const checkoutUrl = `${window.location.pathname}${window.location.search}`;
+    window.history.replaceState({ checkoutLocked: true }, "", checkoutUrl);
+    window.history.pushState({ checkoutLocked: true }, "", checkoutUrl);
+
+    const keepUserOnCheckout = () => {
+      const checkoutEntryAllowed = sessionStorage.getItem("checkout_entry_allowed") === "true";
+      const hasSummary = Boolean(localStorage.getItem("checkout_summary"));
+
+      if (!checkoutEntryAllowed || !hasSummary) return;
+
+      window.history.replaceState({ checkoutLocked: true }, "", "/checkout");
+      window.history.pushState({ checkoutLocked: true }, "", "/checkout");
+      setTimeout(() => router.replace("/checkout"), 0);
+    };
+
+    window.addEventListener("popstate", keepUserOnCheckout);
+
+    return () => {
+      window.removeEventListener("popstate", keepUserOnCheckout);
+    };
+  }, [summaryChecked, summary, router]);
 
   // Check URL parameters for PayPal transaction callback
   useEffect(() => {
-    const success = searchParams.get("payment_success");
-    const cancel = searchParams.get("payment_cancel");
-    const token = searchParams.get("token"); // PayPal Order ID
+    async function handlePaypalReturn() {
+      const success = searchParams.get("payment_success");
+      const cancel = searchParams.get("payment_cancel");
+      const token = searchParams.get("token"); // PayPal Order ID
 
-    if (success === "true" && token) {
-      handlePaypalCapture(token);
-    } else if (cancel === "true") {
-      setCancelWarning("Payment was cancelled on PayPal. You may try again or choose another method.");
-      // Clean query parameters from URL
-      router.replace("/checkout");
+      if (success === "true" && token) {
+        handlePaypalCapture(token);
+      } else if (cancel === "true") {
+        try {
+          await releasePendingPaypalReservations();
+        } catch (err) {
+          console.error("Failed to release PayPal reservations after cancellation:", err);
+        }
+        setCancelWarning("Payment was cancelled on PayPal. You may try again or choose another method.");
+        // Clean query parameters from URL
+        router.replace("/checkout");
+      } else if (getPendingPaypalReservationIds().length > 0) {
+        try {
+          await releasePendingPaypalReservations();
+          setCancelWarning("Your PayPal attempt was not completed. You may try again or choose another method.");
+        } catch (err) {
+          console.error("Failed to release stale PayPal reservations:", err);
+          setCancelWarning("Your previous PayPal attempt was not completed. Please cancel checkout or try again.");
+        }
+      }
     }
-  }, [searchParams]);
+
+    handlePaypalReturn();
+  }, [searchParams, router]);
+
+  useEffect(() => {
+    if (!summaryChecked || !summary || seatUnavailableModalOpen) return;
+
+    let cancelled = false;
+
+    async function checkSelectedSeats() {
+      try {
+        const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
+        if (!cancelled && unavailable.length > 0) {
+          setUnavailableSeats(unavailable);
+          setSeatUnavailableModalOpen(true);
+        }
+      } catch (err) {
+        console.error("Failed to check selected seat availability:", err);
+      }
+    }
+
+    checkSelectedSeats();
+    window.addEventListener("focus", checkSelectedSeats);
+    window.addEventListener("pageshow", checkSelectedSeats);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", checkSelectedSeats);
+      window.removeEventListener("pageshow", checkSelectedSeats);
+    };
+  }, [summaryChecked, summary, seatUnavailableModalOpen]);
 
   const handlePaypalCapture = async (paypalOrderId: string) => {
     // Prevent double invocation
@@ -81,8 +181,22 @@ export function CheckoutPage() {
 
       // Clear summary from local storage
       localStorage.removeItem("checkout_summary");
+      sessionStorage.removeItem("checkout_entry_allowed");
+      clearPendingPaypalReservationIds();
     } catch (err: any) {
       console.error("PayPal Capture failed:", err);
+      if (summary) {
+        try {
+          const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
+          if (unavailable.length > 0) {
+            setUnavailableSeats(unavailable);
+            setSeatUnavailableModalOpen(true);
+            return;
+          }
+        } catch (availabilityErr) {
+          console.error("Failed to check seat availability after PayPal capture error:", availabilityErr);
+        }
+      }
       setCaptureError(err.message || "Failed to confirm payment with PayPal. Please try again.");
     } finally {
       setIsCapturing(false);
@@ -91,8 +205,21 @@ export function CheckoutPage() {
     }
   };
 
+  const handleUnavailableSeatsConfirm = async () => {
+    try {
+      await releasePendingPaypalReservations();
+    } catch (err) {
+      console.error("Failed to release pending PayPal reservations:", err);
+    }
+    localStorage.removeItem("checkout_summary");
+    sessionStorage.removeItem("checkout_entry_allowed");
+    clearPendingPaypalReservationIds();
+    router.push("/seats");
+  };
+
   const handleModalClose = () => {
     setModalOpen(false);
+    sessionStorage.removeItem("checkout_entry_allowed");
     router.push("/");
   };
 
@@ -135,6 +262,14 @@ export function CheckoutPage() {
 
     return () => clearInterval(interval);
   }, [user, authLoading, loginWithGoogle]);
+
+  if (!summaryChecked || !summary) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+      </div>
+    );
+  }
 
   if (authLoading) {
     return (
@@ -201,40 +336,11 @@ export function CheckoutPage() {
     );
   }
 
-  if (!summary || !summary.selectedSeats || summary.selectedSeats.length === 0) {
-    return (
-      <div className="mx-auto w-full max-w-md px-4 py-16">
-        <HardShadowCard shadow="black">
-          <div className="p-4 text-center space-y-6 flex flex-col items-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b]">
-              <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-              </svg>
-            </div>
-            <h2 className="font-headline text-2xl font-black uppercase text-secondary">
-              No Seats Selected
-            </h2>
-            <p className="font-body-md text-sm text-outline max-w-xs leading-relaxed">
-              Please select seats first before proceeding to checkout.
-            </p>
-            <div className="border-t-2 border-on-background/10 pt-6 w-full">
-              <Link href="/seats">
-                <button className="w-full border-4 border-on-background bg-tertiary-fixed py-2.5 font-headline text-xs font-bold uppercase shadow-[2px_2px_0_0_#1c1b1b] hover:bg-[#ffe88f] cursor-pointer">
-                  Go Select Seats
-                </button>
-              </Link>
-            </div>
-          </div>
-        </HardShadowCard>
-      </div>
-    );
-  }
-
-  const displaySubtotal = summary ? summary.subtotal : mockSummary.subtotal;
-  const displayServiceFee = summary ? summary.serviceFee : mockSummary.serviceFee;
-  const displayTotal = summary ? summary.total : mockSummary.total;
-  const selectedSeatsText = summary && summary.selectedSeats ? summary.selectedSeats.join(", ") : "None";
-  const seatTypeLabel = summary ? summary.seatTypeLabel : "C2 Seat";
+  const displaySubtotal = summary.subtotal;
+  const displayServiceFee = summary.serviceFee;
+  const displayTotal = summary.total;
+  const selectedSeatsText = summary.selectedSeats.join(", ");
+  const seatTypeLabel = summary.seatTypeLabel;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8">
@@ -246,14 +352,8 @@ export function CheckoutPage() {
         </div>
       )}
 
-      {cancelWarning && (
-        <div className="border-4 border-amber-500 bg-amber-500/10 p-4 font-body-md text-sm text-amber-600 font-bold shadow-[2px_2px_0_0_#1c1b1b]">
-          ⚠️ {cancelWarning}
-        </div>
-      )}
-
       <div className="grid gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+        <div className="space-y-6 lg:col-span-5">
           <HardShadowCard shadow="black">
             <p className="font-label text-xs uppercase text-outline">Order Summary</p>
             <div className="mt-4 space-y-3">
@@ -285,6 +385,9 @@ export function CheckoutPage() {
               </div>
             </div>
           </HardShadowCard>
+          <HardShadowCard shadow="black">
+            <CheckoutSeatPreview selectedSeats={summary.selectedSeats} seatTypeLabel={seatTypeLabel} />
+          </HardShadowCard>
         </div>
         <div className="lg:col-span-7">
           <HardShadowCard shadow="yellow">
@@ -292,6 +395,68 @@ export function CheckoutPage() {
           </HardShadowCard>
         </div>
       </div>
+
+      {cancelWarning && !seatUnavailableModalOpen && !modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+            <div className="border-b-4 border-on-background pb-3">
+              <p className="font-label text-[10px] font-black uppercase text-outline">
+                PayPal Interrupted
+              </p>
+              <h3 className="mt-1 font-headline text-xl font-black uppercase text-secondary">
+                Payment Not Completed
+              </h3>
+            </div>
+
+            <p className="font-body-md text-sm leading-relaxed text-on-background">
+              {cancelWarning} Your seats are ready to review again here. You can try PayPal once more or choose another payment method.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setCancelWarning(null)}
+              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+            >
+              Continue Checkout
+            </button>
+          </div>
+        </div>
+      )}
+
+      {seatUnavailableModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+            <div className="border-b-4 border-on-background pb-3">
+              <p className="font-label text-[10px] font-black uppercase text-outline">
+                Seat Unavailable
+              </p>
+              <h3 className="mt-1 font-headline text-xl font-black uppercase text-secondary">
+                Please choose again
+              </h3>
+            </div>
+
+            <p className="font-body-md text-sm leading-relaxed text-on-background">
+              {unavailableSeats.join(", ")} {unavailableSeats.length === 1 ? "has" : "have"} already been taken by another completed booking. You'll be returned to the seat map to pick available seats.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleUnavailableSeatsConfirm}
+              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+            >
+              Back to Seat Map
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Success Modal */}
       {modalOpen && (

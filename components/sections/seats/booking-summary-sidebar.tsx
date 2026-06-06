@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const PAYMENT_METHODS = ["gcash", "card"] as const;
-type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export interface SelectedSeatChip {
   id: string;
@@ -30,7 +26,6 @@ export function BookingSummarySidebar({
   seatTypeLabel,
   cinemaId,
 }: BookingSummarySidebarProps) {
-  const [payment, setPayment] = useState<PaymentMethod>("gcash");
   const router = useRouter();
 
   const handleCheckout = () => {
@@ -42,10 +37,10 @@ export function BookingSummarySidebar({
         serviceFee: 0,
         total: total,
         seatTypeLabel,
-        paymentMethod: payment,
         cinemaId,
       };
       localStorage.setItem("checkout_summary", JSON.stringify(summary));
+      sessionStorage.setItem("checkout_entry_allowed", "true");
       router.push("/checkout");
     }
   };
@@ -79,30 +74,8 @@ export function BookingSummarySidebar({
             </div>
           </div>
 
-          {/* Row 2: Payment options & Checkout side-by-side */}
-          <div className="flex items-center justify-between gap-3">
-            {/* Payment Method Option */}
-            <div className="flex flex-col gap-0.5 flex-1 max-w-[150px]">
-              <span className="font-label text-[8px] uppercase font-extrabold opacity-75">Payment</span>
-              <div className="grid grid-cols-2 gap-1">
-                {PAYMENT_METHODS.map((method) => (
-                  <button
-                    key={method}
-                    type="button"
-                    onClick={() => setPayment(method)}
-                    className={`border text-[9px] py-1 text-center font-label font-bold uppercase transition-all ${
-                      payment === method
-                        ? "border-on-background bg-secondary text-white font-black shadow-[1px_1px_0_0_#1c1b1b]"
-                        : "border-outline bg-background text-on-background"
-                    }`}
-                  >
-                    {method === "gcash" ? "GC" : "CRD"}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Info & Checkout Button */}
+          {/* Row 2: Price info & Checkout button */}
+          <div className="flex items-center justify-end gap-3">
             <div className="flex items-center gap-2.5">
               <div className="text-right">
                 <p className="font-label text-[8px] uppercase font-extrabold opacity-75">Total</p>
@@ -152,35 +125,6 @@ export function BookingSummarySidebar({
                 Select seats on the grid above to book.
               </p>
             )}
-          </div>
-
-          {/* Middle Section: Payment Methods */}
-          <div className="flex flex-col gap-2 min-w-[240px]">
-            <p className="font-label text-[10px] uppercase font-extrabold opacity-75 select-none">Choose Payment Method</p>
-             <div className="grid grid-cols-2 gap-2">
-               {PAYMENT_METHODS.map((method) => (
-                 <label key={method} className="cursor-pointer">
-                   <input
-                     type="radio"
-                     name={`payment-${seatTypeLabel}`}
-                     value={method}
-                     checked={payment === method}
-                     onChange={() => setPayment(method)}
-                     className="hidden"
-                   />
-                   <div
-                     className={[
-                       "border-2 py-2 text-center font-label text-xs font-bold uppercase transition-all select-none",
-                       payment === method
-                         ? "border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b]"
-                         : "border-outline bg-background text-on-background hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-none",
-                     ].join(" ")}
-                   >
-                     {method === "gcash" ? "GCash" : "Card"}
-                   </div>
-                 </label>
-               ))}
-             </div>
           </div>
 
           {/* Right Section: Pricing & Checkout CTA */}

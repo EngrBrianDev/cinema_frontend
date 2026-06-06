@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 
 // Custom Icon helper matching app/Home/page.tsx
@@ -52,16 +52,78 @@ function Icon({
   );
 }
 
+function hasValidCheckoutSummary() {
+  if (typeof window === "undefined") return false;
+
+  if (sessionStorage.getItem("checkout_entry_allowed") !== "true") return false;
+
+  const stored = localStorage.getItem("checkout_summary");
+  if (!stored) return false;
+
+  try {
+    const parsed = JSON.parse(stored);
+    return (
+      Array.isArray(parsed.selectedSeats) &&
+      parsed.selectedSeats.length > 0 &&
+      Array.isArray(parsed.seatIds) &&
+      parsed.seatIds.length > 0
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function MainHeader() {
   const { user, logout, loginWithGoogle } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [checkoutAvailable, setCheckoutAvailable] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const effectiveCheckoutAvailable = hasMounted && checkoutAvailable;
+  const checkoutLocked = pathname === "/checkout" && effectiveCheckoutAvailable;
+  const showCheckoutTab = pathname === "/checkout" && effectiveCheckoutAvailable;
   const navItems = [
     { href: "/", label: "Movies" },
     { href: "/seats", label: "Seats" },
     { href: "/checkout", label: "Checkout" },
   ];
+  const visibleNavItems = navItems.filter((item) => item.href !== "/checkout" || showCheckoutTab);
+
+  useEffect(() => {
+    const syncCheckoutState = () => setCheckoutAvailable(hasValidCheckoutSummary());
+
+    syncCheckoutState();
+    setHasMounted(true);
+    window.addEventListener("storage", syncCheckoutState);
+    window.addEventListener("focus", syncCheckoutState);
+
+    return () => {
+      window.removeEventListener("storage", syncCheckoutState);
+      window.removeEventListener("focus", syncCheckoutState);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    if (checkoutLocked) {
+      setDropdownOpen(false);
+    }
+  }, [checkoutLocked]);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+
+    const activeCheckoutLock = hasValidCheckoutSummary();
+    if (checkoutAvailable !== activeCheckoutLock) {
+      setCheckoutAvailable(activeCheckoutLock);
+    }
+
+    if (activeCheckoutLock && pathname !== "/checkout") {
+      window.history.replaceState({ checkoutLocked: true }, "", "/checkout");
+      router.replace("/checkout");
+    }
+  }, [hasMounted, checkoutAvailable, pathname, router]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -125,10 +187,9 @@ export function MainHeader() {
         <div className="flex min-h-14 items-center justify-between gap-2 sm:gap-4 lg:min-h-0 lg:flex-1">
         {/* Left Side: Brand and Links */}
         <div className="flex min-w-0 items-center gap-4 lg:gap-7">
-          <Link
-            href="/"
-            className="shrink-0 overflow-hidden rounded-lg bg-white p-1 shadow-sm transition-transform hover:scale-[1.03]"
-            aria-label="Inspire Cinema home"
+          <div
+            className="shrink-0 overflow-hidden rounded-lg bg-white p-1 shadow-sm"
+            aria-label="Inspire Cinema"
           >
             <Image
               src="/image/cinemalogo.png"
@@ -138,36 +199,67 @@ export function MainHeader() {
               priority
               className="h-auto w-16 rounded-md object-contain sm:w-20 lg:w-20"
             />
-          </Link>
+          </div>
           <nav className="hidden items-center gap-4 lg:flex lg:gap-6" aria-label="Primary navigation">
-            {navItems.map((item) => (
-              <Link
-                href={item.href}
-                key={item.href}
-                className={`font-label text-sm font-black uppercase transition-colors hover:text-tertiary-fixed ${
-                  pathname === item.href ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {visibleNavItems.map((item) => {
+              const navigationLocked = checkoutLocked && item.href !== "/checkout";
+              const disabled = navigationLocked;
+              const className = `font-label text-sm font-black uppercase transition-colors ${
+                pathname === item.href ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
+              } ${disabled ? "cursor-not-allowed opacity-50 hover:text-white" : "hover:text-tertiary-fixed"}`;
+
+              if (disabled) {
+                return (
+                  <span
+                    key={item.href}
+                    className={className}
+                    aria-disabled="true"
+                    title="Finish payment or cancel checkout first"
+                  >
+                    {item.label}
+                  </span>
+                );
+              }
+
+              return (
+                <Link href={item.href} key={item.href} className={className}>
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
         {/* Right Side: Account and Tickets */}
         <div className="relative flex shrink-0 items-center gap-2 sm:gap-3" ref={dropdownRef}>
-          <Link href="/ticket" className="shrink-0">
-            <button className="railroad-border flex min-h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
-              <Icon className="h-5 w-5" name="ticket" />
-              <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
-            </button>
-          </Link>
+          {checkoutLocked ? (
+            <div className="shrink-0 opacity-50" aria-disabled="true" title="Finish payment or cancel checkout first">
+              <button
+                disabled
+                className="railroad-border flex min-h-11 cursor-not-allowed items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed sm:px-4"
+              >
+                <Icon className="h-5 w-5" name="ticket" />
+                <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
+              </button>
+            </div>
+          ) : (
+            <Link href="/ticket" className="shrink-0">
+              <button className="railroad-border flex min-h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
+                <Icon className="h-5 w-5" name="ticket" />
+                <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
+              </button>
+            </Link>
+          )}
 
           {/* User Avatar Button */}
           <button
             aria-label="Account Settings"
+            disabled={checkoutLocked}
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded border-2 border-white bg-on-background text-tertiary-fixed hover:bg-secondary cursor-pointer transition-colors"
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded border-2 border-white bg-on-background text-tertiary-fixed transition-colors ${
+              checkoutLocked ? "cursor-not-allowed opacity-50" : "hover:bg-secondary cursor-pointer"
+            }`}
+            title={checkoutLocked ? "Finish payment or cancel checkout first" : undefined}
           >
             {user ? (
               <span className="font-headline text-lg font-bold uppercase">
@@ -245,22 +337,39 @@ export function MainHeader() {
         </div>
 
         <nav
-          className="grid grid-cols-3 gap-2 border-t border-white/15 pt-2 lg:hidden"
+          className={`grid gap-2 border-t border-white/15 pt-2 lg:hidden ${
+            showCheckoutTab ? "grid-cols-3" : "grid-cols-2"
+          }`}
           aria-label="Primary navigation"
         >
-          {navItems.map((item) => (
-            <Link
-              href={item.href}
-              key={item.href}
-              className={`flex min-h-10 items-center justify-center border-2 px-2 text-center font-label text-[11px] font-black uppercase leading-tight transition-colors sm:text-xs ${
-                pathname === item.href
-                  ? "border-tertiary-fixed bg-tertiary-fixed text-on-background"
-                  : "border-white/40 bg-white/5 text-white hover:border-tertiary-fixed hover:text-tertiary-fixed"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {visibleNavItems.map((item) => {
+            const navigationLocked = checkoutLocked && item.href !== "/checkout";
+            const disabled = navigationLocked;
+            const className = `flex min-h-10 items-center justify-center border-2 px-2 text-center font-label text-[11px] font-black uppercase leading-tight transition-colors sm:text-xs ${
+              pathname === item.href
+                ? "border-tertiary-fixed bg-tertiary-fixed text-on-background"
+                : "border-white/40 bg-white/5 text-white"
+            } ${disabled ? "cursor-not-allowed opacity-50" : "hover:border-tertiary-fixed hover:text-tertiary-fixed"}`;
+
+            if (disabled) {
+              return (
+                <span
+                  key={item.href}
+                  className={className}
+                  aria-disabled="true"
+                  title="Finish payment or cancel checkout first"
+                >
+                  {item.label}
+                </span>
+              );
+            }
+
+            return (
+              <Link href={item.href} key={item.href} className={className}>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>
