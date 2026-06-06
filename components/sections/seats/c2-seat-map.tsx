@@ -205,6 +205,11 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
     return { leftBlock, middleBlock, rightBlock };
   };
 
+  const getMobileSeatLabel = (seatNumber: string) => {
+    if (seatNumber.includes("PWD")) return "P";
+    return seatNumber.replace(/^[A-Z]/, ""); // strip the row label, just show the number (e.g. 17, 16, 1)
+  };
+
   const renderSeatOrBlank = (seat: any, key: string) => {
     if (!seat) {
       return (
@@ -234,26 +239,87 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
               : `Select ${seat.seatNumber}`
         }
         className={[
-          "flex aspect-square w-[var(--c2-seat)] h-[var(--c2-seat)] select-none items-center justify-center rounded-sm border-2 text-[10px] font-black leading-none transition-all duration-100 sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl px-0.5",
+          "flex aspect-square w-[var(--c2-seat)] h-[var(--c2-seat)] select-none items-center justify-center rounded-sm border md:border-2 text-[10px] font-black leading-none transition-all duration-100 sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl px-0.5",
           isOccupied
             ? "cursor-not-allowed border-outline-variant bg-on-background/10 opacity-30 text-outline"
             : isSelected
-              ? "seat-pop border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b] hover:opacity-90"
+              ? "seat-pop border-on-background bg-secondary text-white shadow-none md:shadow-[2px_2px_0_0_#1c1b1b] hover:opacity-90"
               : isPwd
-                ? "border-primary bg-primary/20 text-primary shadow-[1px_1px_0_0_#004e9f] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#004e9f] hover:border-primary active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#004e9f]"
-                : "border-outline bg-surface-variant text-on-background shadow-[1px_1px_0_0_#1c1b1b] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#1c1b1b]",
+                ? "border-primary bg-primary/20 text-primary shadow-none md:shadow-[1px_1px_0_0_#004e9f] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#004e9f] hover:border-primary active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#004e9f]"
+                : "border-outline bg-surface-variant text-on-background shadow-none md:shadow-[1px_1px_0_0_#1c1b1b] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#1c1b1b]",
         ].join(" ")}
       >
         {isOccupied ? (
-          <span className="material-symbols-outlined text-outline text-[12px] sm:text-[16px] md:text-[20px]">
-            close
-          </span>
+          <span className="text-outline text-[7px] md:text-base font-black">✕</span>
         ) : isPwd ? (
-          <span className="font-black text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg">PWD</span>
+          <>
+            <span className="md:hidden text-[7px] font-black">P</span>
+            <span className="font-black text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg hidden md:inline-block">PWD</span>
+          </>
         ) : (
-          <span>{seat.seatNumber}</span>
+          <>
+            <span className="md:hidden text-[7px] font-black leading-none">{getMobileSeatLabel(seat.seatNumber)}</span>
+            <span className="hidden md:inline-block">{seat.seatNumber}</span>
+          </>
         )}
       </button>
+    );
+  };
+
+  const renderC2Header = (type: "A-M" | "N-Q") => {
+    const cols = type === "A-M"
+      ? {
+          left: ["", "", "17", "16"],
+          middle: ["15", "14", "13", "12", "11", "10", "9", "8", "7", "6", "5", "4", "3"],
+          right: ["2", "1", "", "", ""]
+        }
+      : {
+          left: ["22", "21", "20", "19"],
+          middle: ["18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7", "6"],
+          right: ["5", "4", "3", "2", "1"]
+        };
+
+    return (
+      <div
+        className="grid gap-x-[1px] md:gap-x-3.5 justify-center items-center mb-1 select-none opacity-60 w-full max-w-full"
+        style={{
+          gridTemplateColumns:
+            "var(--c2-seat) repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat)) var(--c2-seat)",
+        }}
+      >
+        {/* Left Row Label Placeholder */}
+        <div />
+
+        {/* Left Block */}
+        {cols.left.map((c, i) => (
+          <div key={`left-h-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+
+        {/* Left Aisle */}
+        <div />
+
+        {/* Middle Block */}
+        {cols.middle.map((c, i) => (
+          <div key={`mid-h-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none animate-fade-in">
+            {c}
+          </div>
+        ))}
+
+        {/* Right Aisle */}
+        <div />
+
+        {/* Right Block */}
+        {cols.right.map((c, i) => (
+          <div key={`right-h-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+
+        {/* Right Row Label Placeholder */}
+        <div />
+      </div>
     );
   };
 
@@ -280,8 +346,10 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
 
       {/* Mobile Quick Seating Selector */}
       <div className="w-full max-w-md mx-auto mb-8 md:hidden border-4 border-on-background bg-surface-variant p-5 shadow-[4px_4px_0_0_#1c1b1b]">
-        <h3 className="font-headline text-xl font-black uppercase text-secondary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined">confirmation_number</span>
+        <h3 className="font-headline text-lg font-black uppercase text-secondary mb-4 flex items-center gap-2 select-none">
+          <svg className="w-5 h-5 text-secondary fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4c0-1.1.9-2 2-2h12a2 2 0 0 1 2 2v5.17a3 3 0 0 0 0 5.66V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5.17a3 3 0 0 0 0-5.66V4zm2 2v3.17c1.78.89 3 2.72 3 4.83 0 2.11-1.22 3.94-3 4.83V20h12v-3.17a5.002 5.002 0 0 1 0-9.66V6H6zm10 2v2H8V8h8zm0 6v2H8v-2h8z" />
+          </svg>
           Quick Ticket Selection
         </h3>
 
@@ -401,22 +469,21 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         </div>
       </div>
 
-      <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-2 animate-pulse">
-        Seating Layout Reference (Scroll to view, click to select)
+      <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-4 select-none">
+        Seating Layout Reference (Tap to select)
       </p>
 
       <div
-        className="railroad-border relative w-[95vw] max-w-[95vw] sm:w-[90vw] sm:max-w-[90vw] left-1/2 -ml-[47.5vw] -mr-[47.5vw] sm:-ml-[45vw] sm:-mr-[45vw] bg-on-background/5 p-4 sm:p-8 overflow-x-auto flex flex-col select-none
-                   [--c2-seat:1.8rem] [--c2-aisle:1rem]
-                   sm:[--c2-seat:2.2rem] sm:[--c2-aisle:1.3rem]
+        className="railroad-border relative w-full bg-on-background/5 p-2 md:p-8 overflow-x-hidden flex flex-col select-none
+                   [--c2-seat:2.8vw] [--c2-aisle:3.6vw]
                    md:[--c2-seat:2.6rem] md:[--c2-aisle:1.6rem]
                    lg:[--c2-seat:3rem] lg:[--c2-aisle:1.9rem]
                    xl:[--c2-seat:3.5rem] xl:[--c2-aisle:2.2rem]
                    2xl:[--c2-seat:4rem] 2xl:[--c2-aisle:2.5rem]"
       >
-        <div className="flex flex-col items-center min-w-full w-max">
+        <div className="flex flex-col items-center w-full max-w-full">
           {/* Seating Area Grid Container */}
-          <div className="flex flex-col gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4 select-none w-max">
+          <div className="flex flex-col gap-1 md:gap-3.5 select-none w-full max-w-full items-center">
             {ROW_ORDER.map((rowLabel) => {
               const rowSeats = groupedSeats[rowLabel] || [];
               if (rowSeats.length === 0) return null;
@@ -424,34 +491,48 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
               const { leftBlock, middleBlock, rightBlock } = getRowBlocks(rowLabel, rowSeats);
 
               return (
-                <div
-                  key={rowLabel}
-                  className="grid gap-x-2.5 sm:gap-x-3 md:gap-x-3.5 lg:gap-x-4 justify-center items-center"
-                  style={{
-                    gridTemplateColumns:
-                      "repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat))",
-                  }}
-                >
-                  {/* Left Block (4 columns) */}
-                  {leftBlock.map((seat, index) =>
-                    renderSeatOrBlank(seat, `left-${rowLabel}-${index}`)
-                  )}
+                <div key={rowLabel} className="w-full flex flex-col items-center">
+                  {rowLabel === "A" && renderC2Header("A-M")}
+                  {rowLabel === "N" && renderC2Header("N-Q")}
 
-                  {/* Left Aisle */}
-                  <div className="w-full" aria-hidden />
+                  <div
+                    className="grid gap-x-[1px] md:gap-x-3.5 justify-center items-center w-full max-w-full"
+                    style={{
+                      gridTemplateColumns:
+                        "var(--c2-seat) repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat)) var(--c2-seat)",
+                    }}
+                  >
+                    {/* Left Row Label */}
+                    <div className="flex aspect-square w-[var(--c2-seat)] h-[var(--c2-seat)] items-center justify-center font-headline text-[7px] sm:text-xs font-bold text-outline-variant select-none">
+                      {rowLabel}
+                    </div>
 
-                  {/* Middle Block (13 columns) */}
-                  {middleBlock.map((seat, index) =>
-                    renderSeatOrBlank(seat, `middle-${rowLabel}-${index}`)
-                  )}
+                    {/* Left Block (4 columns) */}
+                    {leftBlock.map((seat, index) =>
+                      renderSeatOrBlank(seat, `left-${rowLabel}-${index}`)
+                    )}
 
-                  {/* Right Aisle */}
-                  <div className="w-full" aria-hidden />
+                    {/* Left Aisle */}
+                    <div className="w-full" aria-hidden />
 
-                  {/* Right Block (5 columns) */}
-                  {rightBlock.map((seat, index) =>
-                    renderSeatOrBlank(seat, `right-${rowLabel}-${index}`)
-                  )}
+                    {/* Middle Block (13 columns) */}
+                    {middleBlock.map((seat, index) =>
+                      renderSeatOrBlank(seat, `middle-${rowLabel}-${index}`)
+                    )}
+
+                    {/* Right Aisle */}
+                    <div className="w-full" aria-hidden />
+
+                    {/* Right Block (5 columns) */}
+                    {rightBlock.map((seat, index) =>
+                      renderSeatOrBlank(seat, `right-${rowLabel}-${index}`)
+                    )}
+
+                    {/* Right Row Label */}
+                    <div className="flex aspect-square w-[var(--c2-seat)] h-[var(--c2-seat)] items-center justify-center font-headline text-[7px] sm:text-xs font-bold text-outline-variant select-none">
+                      {rowLabel}
+                    </div>
+                  </div>
                 </div>
               );
             })}

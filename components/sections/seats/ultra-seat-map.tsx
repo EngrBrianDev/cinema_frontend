@@ -19,14 +19,18 @@ const GRID_TEMPLATE =
 
 function seatClass(isSelected: boolean, isReserved: boolean): string {
   return [
-    `flex aspect-square ${SEAT} select-none items-center justify-center rounded-sm border-2 ${SEAT_TEXT} leading-none transition-all duration-100 px-0.5`,
+    `flex aspect-square ${SEAT} select-none items-center justify-center rounded-sm border md:border-2 ${SEAT_TEXT} leading-none transition-all duration-100 px-0.5`,
     isReserved
       ? "cursor-not-allowed border-outline-variant bg-on-background/10 opacity-30 text-outline"
       : isSelected
-        ? "seat-pop border-on-background bg-secondary text-white shadow-[2px_2px_0_0_#1c1b1b] hover:opacity-90"
-        : "border-outline bg-surface-variant text-on-background shadow-[1px_1px_0_0_#1c1b1b] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#1c1b1b]",
+        ? "seat-pop border-on-background bg-secondary text-white shadow-none md:shadow-[2px_2px_0_0_#1c1b1b] hover:opacity-90"
+        : "border-outline bg-surface-variant text-on-background shadow-none md:shadow-[1px_1px_0_0_#1c1b1b] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#1c1b1b]",
   ].join(" ");
 }
+
+const getMobileUltraLabel = (label: string) => {
+  return label.replace(/^[A-Z]/, ""); // strip the row label, just show the number (e.g. 10, 9, 1)
+};
 
 function UltraSeatButton({
   seat,
@@ -54,11 +58,17 @@ function UltraSeatButton({
       className={seatClass(selected, isReserved)}
     >
       {isReserved ? (
-        <span className="material-symbols-outlined text-outline text-[12px] sm:text-[16px] md:text-[20px]">
-          close
-        </span>
+        <>
+          <span className="md:hidden text-[6px] font-black text-outline">✕</span>
+          <span className="material-symbols-outlined text-outline text-[12px] sm:text-[16px] md:text-[20px] hidden md:inline-block">
+            close
+          </span>
+        </>
       ) : (
-        <span className="max-w-full px-px">{seat.label}</span>
+        <>
+          <span className="md:hidden text-[7px] font-black leading-none">{getMobileUltraLabel(seat.label)}</span>
+          <span className="max-w-full px-px hidden md:inline-block">{seat.label}</span>
+        </>
       )}
     </button>
   );
@@ -247,6 +257,99 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
     setSelected((prev) => prev.filter((sn) => sn !== key));
   };
 
+  const renderUltraHeader = (type: "standard" | "row-h") => {
+    const cols = type === "standard"
+      ? {
+          extL: ["", ""],
+          c10_9: ["10", "9"],
+          c8_7: ["8", "7"],
+          c6_5: ["6", "5"],
+          c4_3: ["4", "3"],
+          c2_1: ["2", "1"],
+          extR: ["", ""],
+        }
+      : {
+          extL: ["12", "11"],
+          c10_9: ["10", "9"],
+          c8_7: ["10", "9"],
+          c6_5: ["8", "7"],
+          c4_3: ["6", "5"],
+          c2_1: ["4", "3"],
+          extR: ["2", "1"],
+        };
+
+    return (
+      <div
+        className="grid justify-center items-center mb-1 select-none opacity-60 w-full max-w-full"
+        style={{
+          gridTemplateColumns:
+            "var(--u-seat) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-aisleL) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-aisleL) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-seat)",
+        }}
+      >
+        {/* Left Row Label Placeholder */}
+        <div />
+
+        {/* Ext L */}
+        {cols.extL.map((c, i) => (
+          <div key={`extl-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+        <div /> {/* small gap */}
+
+        {/* 10, 9 */}
+        {cols.c10_9.map((c, i) => (
+          <div key={`c10_9-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+        <div /> {/* large aisle */}
+
+        {/* 8, 7 */}
+        {cols.c8_7.map((c, i) => (
+          <div key={`c8_7-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none animate-fade-in">
+            {c}
+          </div>
+        ))}
+        <div /> {/* small gap */}
+
+        {/* 6, 5 */}
+        {cols.c6_5.map((c, i) => (
+          <div key={`c6_5-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+        <div /> {/* small gap */}
+
+        {/* 4, 3 */}
+        {cols.c4_3.map((c, i) => (
+          <div key={`c4_3-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+        <div /> {/* large aisle */}
+
+        {/* 2, 1 */}
+        {cols.c2_1.map((c, i) => (
+          <div key={`c2_1-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+        <div /> {/* small gap */}
+
+        {/* Ext R */}
+        {cols.extR.map((c, i) => (
+          <div key={`extr-${i}`} className="text-center font-headline text-[7px] sm:text-[10px] md:text-xs font-bold text-outline select-none">
+            {c}
+          </div>
+        ))}
+
+        {/* Right Row Label Placeholder */}
+        <div />
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -270,8 +373,10 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
 
       {/* Mobile Quick Seating Selector */}
       <div className="w-full max-w-md mx-auto mb-8 md:hidden border-4 border-on-background bg-surface-variant p-5 shadow-[4px_4px_0_0_#1c1b1b]">
-        <h3 className="font-headline text-xl font-black uppercase text-secondary mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined">confirmation_number</span>
+        <h3 className="font-headline text-lg font-black uppercase text-secondary mb-4 flex items-center gap-2 select-none">
+          <svg className="w-5 h-5 text-secondary fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4c0-1.1.9-2 2-2h12a2 2 0 0 1 2 2v5.17a3 3 0 0 0 0 5.66V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5.17a3 3 0 0 0 0-5.66V4zm2 2v3.17c1.78.89 3 2.72 3 4.83 0 2.11-1.22 3.94-3 4.83V20h12v-3.17a5.002 5.002 0 0 1 0-9.66V6H6zm10 2v2H8V8h8zm0 6v2H8v-2h8z" />
+          </svg>
           Quick Ticket Selection
         </h3>
 
@@ -386,32 +491,52 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         </div>
       </div>
 
-      <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-2 animate-pulse">
-        Seating Layout Reference (Scroll to view, click to select)
+      <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-4 select-none">
+        Seating Layout Reference (Tap to select)
       </p>
 
       <div
-        className="railroad-border relative w-[95vw] max-w-[95vw] sm:w-[90vw] sm:max-w-[90vw] left-1/2 -ml-[47.5vw] -mr-[47.5vw] sm:-ml-[45vw] sm:-mr-[45vw] bg-on-background/5 p-4 sm:p-8 overflow-x-auto flex flex-col select-none
-                   [--u-seat:2rem] [--u-aisleL:1.1rem] [--u-gap:0.25rem]
-                   sm:[--u-seat:2.5rem] sm:[--u-aisleL:1.4rem] sm:[--u-gap:0.35rem]
+        className="railroad-border relative w-full bg-on-background/5 p-2 md:p-8 overflow-x-hidden flex flex-col select-none
+                   [--u-seat:3.6vw] [--u-aisleL:4.5vw] [--u-gap:1.2vw]
                    md:[--u-seat:3rem] md:[--u-aisleL:1.7rem] md:[--u-gap:0.45rem]
                    lg:[--u-seat:3.5rem] lg:[--u-aisleL:2rem] lg:[--u-gap:0.55rem]
                    xl:[--u-seat:4rem] xl:[--u-aisleL:2.3rem] xl:[--u-gap:0.65rem]
                    2xl:[--u-seat:4.5rem] 2xl:[--u-aisleL:2.6rem] 2xl:[--u-gap:0.75rem]"
       >
-        <div className="flex flex-col items-center min-w-full w-max">
-          <div
-            className="grid gap-y-2.5 sm:gap-y-3 md:gap-y-3.5 lg:gap-y-4"
-            style={{
-              gridTemplateColumns:
-                "var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-aisleL) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-aisleL) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat)",
-            }}
-          >
-            {ultraAllRowSlots.flatMap((rowSlots, rowIndex) =>
-              rowSlots.map((slot, slotIndex) =>
-                renderSlot(slot, rowIndex * 100 + slotIndex, selected, occupiedSeatNumbers, toggleSeat),
-              ),
-            )}
+        <div className="flex flex-col items-center w-full max-w-full">
+          <div className="flex flex-col gap-1 md:gap-3.5 select-none w-full max-w-full items-center">
+            {ultraAllRowSlots.map((rowSlots, rowIndex) => {
+              const rowLabel = ROW_ORDER[rowIndex];
+              return (
+                <div key={rowLabel} className="w-full flex flex-col items-center animate-fade-in">
+                  {rowLabel === "A" && renderUltraHeader("standard")}
+                  {rowLabel === "H" && renderUltraHeader("row-h")}
+                  
+                  <div
+                    className="grid justify-center items-center w-full max-w-full"
+                    style={{
+                      gridTemplateColumns:
+                        "var(--u-seat) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-aisleL) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-aisleL) var(--u-seat) var(--u-seat) var(--u-gap) var(--u-seat) var(--u-seat) var(--u-seat)",
+                    }}
+                  >
+                    {/* Left Row Label */}
+                    <div className="flex aspect-square w-[var(--u-seat)] h-[var(--u-seat)] items-center justify-center font-headline text-[7px] sm:text-xs font-bold text-outline-variant select-none">
+                      {rowLabel}
+                    </div>
+
+                    {/* 20 slots of row */}
+                    {rowSlots.map((slot, slotIndex) =>
+                      renderSlot(slot, rowIndex * 100 + slotIndex, selected, occupiedSeatNumbers, toggleSeat)
+                    )}
+
+                    {/* Right Row Label */}
+                    <div className="flex aspect-square w-[var(--u-seat)] h-[var(--u-seat)] items-center justify-center font-headline text-[7px] sm:text-xs font-bold text-outline-variant select-none">
+                      {rowLabel}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <SeatLegend />
