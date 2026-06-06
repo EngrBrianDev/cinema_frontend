@@ -339,6 +339,21 @@ export function MainFooter() {
           </div>
 
           <div className="min-w-0">
+            <h2 className="font-headline text-sm uppercase text-white">Support</h2>
+            <nav className="mt-5 flex flex-col items-start gap-3" aria-label="Footer support links">
+              {supportLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="font-label text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="min-w-0">
             <h2 className="font-headline text-sm uppercase text-white">Follow Us</h2>
             <div className="mt-5 flex gap-3">
               {socialLinks.map((social) => (
