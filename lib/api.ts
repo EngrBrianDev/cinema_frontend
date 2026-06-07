@@ -1,7 +1,14 @@
 import { encryptPayload, decryptPayload } from "./crypto";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-const CLIENT_API_KEY = process.env.NEXT_PUBLIC_CLIENT_API_KEY || "";
+const isServer = typeof window === "undefined";
+const API_URL = isServer
+  ? (process.env.BACKEND_API_URL || "http://localhost:4000")
+  : "/api/proxy";
+
+const CLIENT_API_KEY = isServer
+  ? (process.env.BACKEND_CLIENT_API_KEY || "")
+  : "";
+
 const DISABLE_API_ENCRYPTION = process.env.NEXT_PUBLIC_DISABLE_API_ENCRYPTION === "true";
 
 interface FetchOptions extends RequestInit {
@@ -13,7 +20,9 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
   
   // 1. Prepare default headers
   const headers = new Headers(options.headers || {});
-  headers.set("x-api-key", CLIENT_API_KEY);
+  if (CLIENT_API_KEY) {
+    headers.set("x-api-key", CLIENT_API_KEY);
+  }
   
   // 2. Attach JWT bearer token if exists in local storage
   if (typeof window !== "undefined") {

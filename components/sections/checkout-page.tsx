@@ -317,6 +317,8 @@ export function CheckoutPage() {
             <div className="border-t-2 border-on-background/10 pt-6 flex flex-col items-center gap-3 w-full">
               <div id="google-checkout-signin-btn" className="w-full flex justify-center"></div>
               
+              {/* FE-HIGH-02 FIX: Dev login only in non-production */}
+              {process.env.NODE_ENV !== "production" && (
               <button
                 onClick={async () => {
                   try {
@@ -329,6 +331,7 @@ export function CheckoutPage() {
               >
                 Use Dev Login
               </button>
+              )}
             </div>
           </div>
         </HardShadowCard>
