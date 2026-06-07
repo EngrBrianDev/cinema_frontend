@@ -129,8 +129,19 @@ export function PaymentMethodTabs() {
         });
 
         if (result.approvalLink) {
+          // FE-MED-01 FIX: Validate PayPal redirect URL domain
+          try {
+            const approvalUrl = new URL(result.approvalLink);
+            const isValidPayPal = approvalUrl.protocol === 'https:' &&
+              (approvalUrl.hostname.endsWith('.paypal.com') || approvalUrl.hostname === 'paypal.com');
+            if (!isValidPayPal) {
+              throw new Error("Invalid payment gateway URL detected. Aborting for your safety.");
+            }
+          } catch (urlErr: any) {
+            if (urlErr.message.includes("Invalid payment")) throw urlErr;
+            throw new Error("Invalid approval link received from payment gateway.");
+          }
           savePendingPaypalReservationIds(resIds);
-          // Redirect the browser window directly to PayPal hosted payment page
           window.location.href = result.approvalLink;
         } else {
           throw new Error("Failed to retrieve PayPal approval link from the payment gateway.");

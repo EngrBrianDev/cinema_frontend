@@ -189,7 +189,19 @@ export function TicketConfirmationPage() {
   const handlePrint = (ticket: GroupedTicket) => {
     if (ticket.ticketUrls && ticket.ticketUrls.length > 0) {
       ticket.ticketUrls.forEach((url) => {
-        window.open(url, "_blank");
+        // FE-LOW-01 FIX: Validate ticket URL domain before opening
+        try {
+          const parsed = new URL(url);
+          const isTrusted = parsed.protocol === 'https:' &&
+            (parsed.hostname.endsWith('.supabase.co') || parsed.hostname.endsWith('.supabase.in'));
+          if (isTrusted) {
+            window.open(url, "_blank");
+          } else {
+            console.warn("Blocked untrusted ticket URL:", parsed.hostname);
+          }
+        } catch {
+          console.warn("Invalid ticket URL format:", url);
+        }
       });
     } else {
       window.print();
@@ -224,6 +236,8 @@ export function TicketConfirmationPage() {
             <div className="border-t-2 border-on-background/10 pt-6 flex flex-col items-center gap-3 w-full">
               <div id="google-ticket-signin-btn" className="w-full flex justify-center"></div>
               
+              {/* FE-HIGH-02 FIX: Dev login only in non-production */}
+              {process.env.NODE_ENV !== "production" && (
               <button
                 onClick={async () => {
                   try {
@@ -236,6 +250,7 @@ export function TicketConfirmationPage() {
               >
                 Use Dev Login
               </button>
+              )}
             </div>
           </div>
         </HardShadowCard>

@@ -34,6 +34,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (storedToken && storedUser) {
         try {
+          // FE-MED-03 FIX: Check JWT expiry before restoring session
+          const payload = JSON.parse(atob(storedToken.split('.')[1]));
+          if (payload.exp && Date.now() >= payload.exp * 1000) {
+            // Token expired — clear and force re-login
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("auth_user");
+            setLoading(false);
+            return;
+          }
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
         } catch (error) {
