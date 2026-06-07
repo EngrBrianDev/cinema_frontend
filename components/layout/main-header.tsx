@@ -316,6 +316,8 @@ export function MainHeader() {
                   {/* Container for Google Render Button - always rendered to prevent DOM find failures */}
                   <div id="google-signin-btn" className="w-full flex justify-center"></div>
                   
+                  {/* FE-HIGH-02 FIX: Dev login only in non-production */}
+                  {process.env.NODE_ENV !== "production" && (
                   <button
                     onClick={async () => {
                       try {
@@ -329,6 +331,7 @@ export function MainHeader() {
                   >
                     Use Dev Login
                   </button>
+                  )}
                 </div>
               </div>
             )}
