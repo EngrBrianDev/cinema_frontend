@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 
 export interface SelectedSeatChip {
   id: string;
@@ -27,6 +28,7 @@ export function BookingSummarySidebar({
   cinemaId,
 }: BookingSummarySidebarProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleCheckout = () => {
     if (typeof window !== "undefined") {
@@ -46,7 +48,7 @@ export function BookingSummarySidebar({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t-4 border-on-background bg-surface-variant px-4 py-3 md:px-12 md:py-5 shadow-[0_-6px_0_0_#1c1b1b]">
+    <div className="mt-6 w-full border-y-4 border-on-background bg-surface-variant px-4 py-3 shadow-[0_6px_0_0_#1c1b1b] md:px-12 md:py-5">
       <div className="mx-auto w-full max-w-7xl">
         {/* Mobile Layout (< md) */}
         <div className="md:hidden flex flex-col gap-2.5">
@@ -75,6 +77,7 @@ export function BookingSummarySidebar({
           </div>
 
           {/* Row 2: Price info & Checkout button */}
+          {user && (
           <div className="flex items-center justify-end gap-3">
             <div className="flex items-center gap-2.5">
               <div className="text-right">
@@ -92,6 +95,7 @@ export function BookingSummarySidebar({
               </button>
             </div>
           </div>
+          )}
         </div>
 
         {/* Desktop Layout (>= md) */}
@@ -128,6 +132,7 @@ export function BookingSummarySidebar({
           </div>
 
           {/* Right Section: Pricing & Checkout CTA */}
+          {user && (
           <div className="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 border-on-background/10 pt-4 md:pt-0">
             <div className="text-right select-none">
               <p className="font-label text-[10px] uppercase font-extrabold opacity-75">Total Amount</p>
@@ -144,6 +149,7 @@ export function BookingSummarySidebar({
               Checkout
             </button>
           </div>
+          )}
         </div>
       </div>
     </div>

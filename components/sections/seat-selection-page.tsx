@@ -26,9 +26,9 @@ export function SeatSelectionPage() {
               HOME ALONG DA RILES: THE REUNION
             </p>
             <div className="mt-4 flex gap-4 font-label text-xs uppercase text-outline-variant">
-              <span>Dec 24, 2024</span>
+              <span>Jun 18, 2026</span>
               <span>•</span>
-              <span>7:30 PM</span>
+              <span>1:00 PM - 5:00 PM</span>
             </div>
           </div>
         </div>

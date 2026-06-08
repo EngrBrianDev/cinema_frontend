@@ -238,7 +238,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
               : `Select ${seat.seatNumber}`
         }
         className={[
-          "flex aspect-square w-[var(--c2-seat)] h-[var(--c2-seat)] select-none items-center justify-center rounded-sm border md:border-2 text-[10px] font-black leading-none transition-all duration-100 sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl px-0.5",
+          "flex aspect-square w-[var(--c2-seat)] h-[var(--c2-seat)] select-none items-center justify-center rounded-sm border md:border-2 text-[10px] font-black leading-none transition-all duration-100 sm:text-xs md:text-xs lg:text-sm 2xl:text-base px-0.5",
           isOccupied
             ? "cursor-not-allowed border-outline-variant bg-on-background/10 opacity-30 text-outline"
             : isSelected
@@ -253,7 +253,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         ) : isPwd ? (
           <>
             <span className="md:hidden text-[7px] font-black">P</span>
-            <span className="font-black text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg hidden md:inline-block">PWD</span>
+            <span className="font-black text-[9px] sm:text-[10px] md:text-[10px] lg:text-xs 2xl:text-sm hidden md:inline-block">PWD</span>
           </>
         ) : (
           <>
@@ -280,7 +280,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
 
     return (
       <div
-        className="grid gap-x-[1px] md:gap-x-3.5 justify-center items-center mb-1 select-none opacity-60 w-full max-w-full"
+        className="grid gap-x-[1px] md:gap-x-2 lg:gap-x-2.5 justify-center items-center mb-1 select-none opacity-60 w-full max-w-full"
         style={{
           gridTemplateColumns:
             "var(--c2-seat) repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat)) var(--c2-seat)",
@@ -347,10 +347,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
   }
 
   return (
-    <div className="w-full flex flex-col items-center pb-40">
-      <SeatScreen />
-
-      {/* Mobile Quick Seating Selector */}
+    <div className="w-full flex flex-col items-center pb-12">
       <div className="w-full max-w-md mx-auto mb-8 md:hidden border-4 border-on-background bg-surface-variant p-5 shadow-[4px_4px_0_0_#1c1b1b]">
         <h3 className="font-headline text-lg font-black uppercase text-secondary mb-4 flex items-center gap-2 select-none">
           <svg className="w-5 h-5 text-secondary fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -475,17 +472,18 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         </div>
       </div>
 
+      <SeatScreen />
       <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-4 select-none">
         Seating Layout Reference (Tap to select)
       </p>
 
       <div
-        className="railroad-border relative w-full bg-on-background/5 p-2 md:p-8 overflow-x-hidden flex flex-col select-none
-                   [--c2-seat:2.8vw] [--c2-aisle:3.6vw]
-                   md:[--c2-seat:2.6rem] md:[--c2-aisle:1.6rem]
-                   lg:[--c2-seat:3rem] lg:[--c2-aisle:1.9rem]
-                   xl:[--c2-seat:3.5rem] xl:[--c2-aisle:2.2rem]
-                   2xl:[--c2-seat:4rem] 2xl:[--c2-aisle:2.5rem]"
+        className="railroad-border relative w-full bg-on-background/5 p-2 md:p-6 overflow-x-auto flex flex-col select-none
+                   [--c2-seat:2.45vw] [--c2-aisle:3vw]
+                   md:[--c2-seat:1.9rem] md:[--c2-aisle:1.15rem]
+                   lg:[--c2-seat:2.1rem] lg:[--c2-aisle:1.3rem]
+                   xl:[--c2-seat:2.35rem] xl:[--c2-aisle:1.45rem]
+                   2xl:[--c2-seat:2.55rem] 2xl:[--c2-aisle:1.6rem]"
       >
         <div className="flex flex-col items-center w-full max-w-full">
           {/* Seating Area Grid Container */}
@@ -502,7 +500,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
                   {rowLabel === "N" && renderC2Header("N-Q")}
 
                   <div
-                    className="grid gap-x-[1px] md:gap-x-3.5 justify-center items-center w-full max-w-full"
+                    className="grid gap-x-[1px] md:gap-x-2 lg:gap-x-2.5 justify-center items-center w-full max-w-full"
                     style={{
                       gridTemplateColumns:
                         "var(--c2-seat) repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat)) var(--c2-seat)",

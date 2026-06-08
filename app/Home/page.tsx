@@ -4,6 +4,7 @@ import { MainFooter } from "@/components/layout/main-footer";
 import { MainHeader } from "@/components/layout/main-header";
 
 const posterSrc = "/image/cinema_ticket.jpg";
+const trailerEmbedSrc = "https://www.youtube.com/embed/mwEGtZ17aao";
 
 const schedule = [
   { time: "1:00 PM", label: "Ingress" },
@@ -102,16 +103,20 @@ function Icon({
 }
 
 function SponsorMarquee() {
-  const repeatedSponsors = Array.from({ length: 4 }).flatMap(() => sponsors);
+  const repeatedSponsors = Array.from({ length: 12 }).flatMap(() => sponsors);
 
   return (
-    <div className="flex animate-marquee items-center gap-8 font-headline text-xl uppercase text-[#221b00] sm:gap-10 sm:text-2xl md:gap-12 md:text-3xl">
-      {repeatedSponsors.map((sponsor, index) => (
-        <span className="flex items-center gap-8 sm:gap-10 md:gap-12" key={`${sponsor}-${index}`}>
-          <span>{sponsor}</span>
-          <span className="text-xl">{"\u2022"}</span>
-        </span>
-      ))}
+    <div className="relative w-full overflow-hidden">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#ffe16d] via-[#ffe16d]/80 to-transparent opacity-90 blur-sm z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#ffe16d] via-[#ffe16d]/80 to-transparent opacity-90 blur-sm z-10" />
+      <div className="relative z-0 flex animate-marquee min-w-[200%] items-center gap-8 font-headline text-xl uppercase text-[#221b00] sm:gap-10 sm:text-2xl md:gap-12 md:text-3xl">
+        {repeatedSponsors.map((sponsor, index) => (
+          <span className="flex items-center gap-8 sm:gap-10 md:gap-12 whitespace-nowrap" key={`${sponsor}-${index}`}>
+            <span>{sponsor}</span>
+            <span className="text-xl">{"\u2022"}</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -121,10 +126,10 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden bg-[#fcf9f8] text-[#1c1b1b]">
       <MainHeader />
 
-      <main className="pt-[7.5rem] lg:pt-20">
+      <main className="pt-[7.75rem] lg:pt-20">
         <section className="relative border-b-4 border-[#1c1b1b] bg-[linear-gradient(120deg,#fff8eb_0%,#fcf9f8_52%,#ffe16d_52%,#ffe16d_54%,#fcf9f8_54%)]">
-          <div className="mx-auto grid max-w-[1440px] items-center gap-8 px-4 py-8 sm:px-5 md:gap-12 md:px-10 md:py-12 lg:min-h-[720px] lg:grid-cols-[0.92fr_1.08fr] lg:py-14 xl:px-16">
-            <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px]">
+          <div className="cinema-wide-container grid items-center gap-8 px-4 py-8 sm:px-5 md:gap-12 md:px-10 md:py-12 lg:min-h-[720px] lg:grid-cols-[0.92fr_1.08fr] lg:py-14 xl:px-16 [min-width:1800px]:min-h-[820px] [min-width:2400px]:min-h-[940px]">
+            <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px] [min-width:1800px]:max-w-[620px] [min-width:2400px]:max-w-[760px]">
               <div className="absolute -left-1 top-4 z-20 bg-[#ffe16d] px-3 py-2 font-headline text-lg uppercase text-[#221b00] shadow-[5px_5px_0_#bb0014] sm:px-5 sm:py-3 sm:text-2xl md:-left-5">
                 HOT!
               </div>
@@ -140,16 +145,16 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:text-left">
+            <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:text-left [min-width:1800px]:max-w-3xl [min-width:2400px]:max-w-4xl">
               <p className="mb-4 inline-flex max-w-full border-2 border-[#1c1b1b] bg-white px-3 py-2 font-label text-[10px] font-black uppercase leading-snug tracking-[0.12em] text-[#bb0014] shadow-[4px_4px_0_#ffe16d] sm:text-xs sm:tracking-[0.18em] md:mb-5 md:tracking-[0.22em]">
                 One-night-only reunion screening
               </p>
-              <h2 className="font-headline text-[clamp(2.25rem,13vw,7rem)] font-black uppercase leading-[0.9] tracking-normal text-[#004e9f]">
+              <h2 className="font-headline text-[clamp(2.25rem,13vw,7rem)] font-black uppercase leading-[0.9] tracking-normal text-[#004e9f] [min-width:1800px]:text-[8rem] [min-width:2400px]:text-[9.5rem]">
                 Home Along
                 <br />
                 <span className="text-[#bb0014] italic">Da Riles</span>
               </h2>
-              <p className="mx-auto mt-5 max-w-xl font-body-md text-[clamp(0.95rem,3.7vw,1.25rem)] leading-7 text-[#313030] md:mt-8 md:leading-8 lg:mx-0">
+              <p className="mx-auto mt-5 max-w-xl font-body-md text-[clamp(0.95rem,3.7vw,1.25rem)] leading-7 text-[#313030] md:mt-8 md:leading-8 lg:mx-0 [min-width:1800px]:max-w-2xl [min-width:1800px]:text-2xl [min-width:1800px]:leading-9">
                 The ultimate nostalgic comeback! Join the Kosme family for a one-night-only reunion screening. Relive
                 the laughter, the &quot;riles&quot; life, and the classic Pinoy humor that defined a generation.
               </p>
@@ -160,18 +165,41 @@ export default function Home() {
                 >
                   Buy Tickets Now
                 </Link>
-                <a
-                  href="https://youtu.be/mwEGtZ17aao?si=F0gdvxmozWUsxoPK"
-                  className="inline-flex min-h-14 w-full items-center justify-center border-4 border-[#1c1b1b] bg-[#004e9f] px-5 py-4 text-center font-headline text-base uppercase tracking-[0.1em] text-white shadow-[7px_7px_0_#ffe16d] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-7 md:px-9 md:py-5 md:text-xl md:tracking-[0.14em]"
-                >
-                  View Trailer
-                </a>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-[1440px] gap-6 px-4 py-10 sm:px-5 md:px-10 md:py-16 lg:grid-cols-[2fr_1fr] xl:px-16">
+        <section className="border-b-4 border-[#1c1b1b] bg-[#004e9f] px-4 py-10 text-white sm:px-5 md:px-10 md:py-16 xl:px-16">
+          <div className="cinema-wide-container grid items-center gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+            <div>
+              <span className="inline-block bg-[#ffe16d] px-4 py-2 font-label text-xs font-black uppercase text-[#221b00] shadow-[4px_4px_0_#bb0014]">
+                Official Trailer
+              </span>
+              <h2 className="mt-5 font-headline text-[clamp(2rem,9vw,4rem)] font-black uppercase leading-none tracking-normal text-white">
+                Watch The Trailer
+              </h2>
+              <p className="mt-5 max-w-xl font-body-md text-base leading-7 text-white/85 sm:text-lg md:text-xl md:leading-8">
+                Get a quick taste of the reunion screening and the classic Pinoy comedy energy coming back to the big screen.
+              </p>
+            </div>
+
+            <div className="border-4 border-[#1c1b1b] bg-[#1c1b1b] p-2 shadow-[10px_10px_0_#ffe16d] sm:p-3">
+              <div className="aspect-video w-full overflow-hidden bg-[#1c1b1b]">
+                <iframe
+                  className="h-full w-full"
+                  src={trailerEmbedSrc}
+                  title="Home Along Da Riles official trailer"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="cinema-wide-container grid gap-6 px-4 py-10 sm:px-5 md:px-10 md:py-16 lg:grid-cols-[2fr_1fr] xl:px-16">
           <div className="border-4 border-[#1c1b1b] bg-[#1c1b1b] p-4 text-white shadow-[10px_10px_0_#bb0014] sm:p-6 md:p-9">
             <div className="mb-6 flex items-center gap-3 text-[#ffe16d] md:mb-8 md:gap-4">
               <Icon className="h-7 w-7 sm:h-8 sm:w-8" name="calendar" />
@@ -217,10 +245,15 @@ export default function Home() {
         </section>
 
         <section className="overflow-hidden border-y-4 border-[#1c1b1b] bg-[#ffe16d] py-4 md:py-5">
-          <SponsorMarquee />
+          <div className="w-full max-w-none flex flex-col items-center gap-3 px-0">
+            <p className="font-label text-center text-sm font-black uppercase tracking-[0.35em] text-[#221b00] sm:text-base md:text-lg">
+              Sponsored by:
+            </p>
+            <SponsorMarquee />
+          </div>
         </section>
 
-        <section className="mx-auto max-w-[1440px] px-4 py-10 sm:px-5 md:px-10 md:py-16 xl:px-16">
+        <section className="cinema-wide-container px-4 py-10 sm:px-5 md:px-10 md:py-16 xl:px-16">
           <div className="grid items-center gap-8 border-4 border-[#1c1b1b] bg-[#bb0014] p-5 text-white shadow-[8px_8px_0_#1c1b1b] sm:p-7 md:shadow-[12px_12px_0_#1c1b1b] lg:grid-cols-[1.4fr_0.8fr] lg:p-14">
             <div>
               <span className="mb-4 inline-block -rotate-2 bg-[#ffe16d] px-4 py-2 font-headline text-base uppercase text-[#221b00] sm:text-xl md:mb-5 md:px-5 md:text-2xl">
