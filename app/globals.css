@@ -83,6 +83,24 @@ textarea:focus-visible {
   font-family: var(--font-vietnam, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
 
+.cinema-wide-container {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+@media (min-width: 1800px) {
+  .cinema-wide-container {
+    max-width: 1680px;
+  }
+}
+
+@media (min-width: 2400px) {
+  .cinema-wide-container {
+    max-width: 2100px;
+  }
+}
+
 .hard-shadow-red {
   box-shadow: 4px 4px 0 0 #ba1a1a;
 }

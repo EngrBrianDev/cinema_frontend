@@ -96,6 +96,55 @@ export function CheckoutPage() {
     };
   }, [summaryChecked, summary, router]);
 
+  async function handlePaypalCapture(paypalOrderId: string) {
+    // Prevent double invocation
+    if (isCapturing || captureSuccess) return;
+
+    setIsCapturing(true);
+    setCaptureError(null);
+    setCancelWarning(null);
+
+    try {
+      const result = await apiFetch("/payments/paypal/capture", {
+        method: "POST",
+        body: {
+          paypalOrderId,
+        },
+      });
+
+      setCaptureSuccess(true);
+      const ticketNums = result.tickets.map((t: any) => t.ticketNumber).join(", ");
+
+      setModalTitle("Payment Successful!");
+      setModalBody(`Thank you! Your payment has been processed successfully.\n\nDigital ticket(s) ${ticketNums} has been sent to your email.`);
+      setModalOpen(true);
+
+      // Clear summary from local storage
+      localStorage.removeItem("checkout_summary");
+      sessionStorage.removeItem("checkout_entry_allowed");
+      clearPendingPaypalReservationIds();
+    } catch (err: any) {
+      console.error("PayPal Capture failed:", err);
+      if (summary) {
+        try {
+          const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
+          if (unavailable.length > 0) {
+            setUnavailableSeats(unavailable);
+            setSeatUnavailableModalOpen(true);
+            return;
+          }
+        } catch (availabilityErr) {
+          console.error("Failed to check seat availability after PayPal capture error:", availabilityErr);
+        }
+      }
+      setCaptureError(err.message || "Failed to confirm payment with PayPal. Please try again.");
+    } finally {
+      setIsCapturing(false);
+      // Clean query parameters from URL
+      router.replace("/checkout");
+    }
+  }
+
   // Check URL parameters for PayPal transaction callback
   useEffect(() => {
     async function handlePaypalReturn() {
@@ -155,55 +204,6 @@ export function CheckoutPage() {
       window.removeEventListener("pageshow", checkSelectedSeats);
     };
   }, [summaryChecked, summary, seatUnavailableModalOpen]);
-
-  const handlePaypalCapture = async (paypalOrderId: string) => {
-    // Prevent double invocation
-    if (isCapturing || captureSuccess) return;
-
-    setIsCapturing(true);
-    setCaptureError(null);
-    setCancelWarning(null);
-
-    try {
-      const result = await apiFetch("/payments/paypal/capture", {
-        method: "POST",
-        body: {
-          paypalOrderId,
-        },
-      });
-
-      setCaptureSuccess(true);
-      const ticketNums = result.tickets.map((t: any) => t.ticketNumber).join(", ");
-      
-      setModalTitle("Payment Successful!");
-      setModalBody(`Thank you! Your payment has been processed successfully.\n\nDigital ticket(s) ${ticketNums} has been sent to your email.`);
-      setModalOpen(true);
-
-      // Clear summary from local storage
-      localStorage.removeItem("checkout_summary");
-      sessionStorage.removeItem("checkout_entry_allowed");
-      clearPendingPaypalReservationIds();
-    } catch (err: any) {
-      console.error("PayPal Capture failed:", err);
-      if (summary) {
-        try {
-          const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
-          if (unavailable.length > 0) {
-            setUnavailableSeats(unavailable);
-            setSeatUnavailableModalOpen(true);
-            return;
-          }
-        } catch (availabilityErr) {
-          console.error("Failed to check seat availability after PayPal capture error:", availabilityErr);
-        }
-      }
-      setCaptureError(err.message || "Failed to confirm payment with PayPal. Please try again.");
-    } finally {
-      setIsCapturing(false);
-      // Clean query parameters from URL
-      router.replace("/checkout");
-    }
-  };
 
   const handleUnavailableSeatsConfirm = async () => {
     try {
@@ -455,7 +455,7 @@ export function CheckoutPage() {
             </div>
 
             <p className="font-body-md text-sm leading-relaxed text-on-background">
-              {unavailableSeats.join(", ")} {unavailableSeats.length === 1 ? "has" : "have"} already been taken by another completed booking. You'll be returned to the seat map to pick available seats.
+              {unavailableSeats.join(", ")} {unavailableSeats.length === 1 ? "has" : "have"} already been taken by another completed booking. You&apos;ll be returned to the seat map to pick available seats.
             </p>
 
             <button

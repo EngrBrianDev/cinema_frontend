@@ -156,7 +156,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
     const isRear = ["N", "P", "Q"].includes(rowLabel);
 
     let leftBlock: any[] = [];
-    let middleBlock: any[] = [];
+    const middleBlock: any[] = [];
     let rightBlock: any[] = [];
 
     if (!isRear) {
@@ -253,7 +253,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         ) : isPwd ? (
           <>
             <span className="md:hidden text-[7px] font-black">P</span>
-            <span className="font-black text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg hidden md:inline-block">PWD</span>
+            <span className="font-black text-[9px] sm:text-[10px] md:text-[10px] lg:text-xs 2xl:text-sm hidden md:inline-block">PWD</span>
           </>
         ) : (
           <>
@@ -280,7 +280,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
 
     return (
       <div
-        className="grid gap-x-[1px] md:gap-x-3.5 justify-center items-center mb-1 select-none opacity-60 w-full max-w-full"
+        className="grid gap-x-[1px] md:gap-x-2 lg:gap-x-2.5 justify-center items-center mb-1 select-none opacity-60 w-full max-w-full"
         style={{
           gridTemplateColumns:
             "var(--c2-seat) repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat)) var(--c2-seat)",
@@ -483,12 +483,12 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
       </p>
 
       <div
-        className="railroad-border relative w-full bg-on-background/5 p-2 md:p-8 overflow-x-hidden flex flex-col select-none
-                   [--c2-seat:2.8vw] [--c2-aisle:3.6vw]
-                   md:[--c2-seat:2.6rem] md:[--c2-aisle:1.6rem]
-                   lg:[--c2-seat:3rem] lg:[--c2-aisle:1.9rem]
-                   xl:[--c2-seat:3.5rem] xl:[--c2-aisle:2.2rem]
-                   2xl:[--c2-seat:4rem] 2xl:[--c2-aisle:2.5rem]"
+        className="railroad-border relative w-full bg-on-background/5 p-2 md:p-6 overflow-x-auto flex flex-col select-none
+                   [--c2-seat:2.45vw] [--c2-aisle:3vw]
+                   md:[--c2-seat:1.9rem] md:[--c2-aisle:1.15rem]
+                   lg:[--c2-seat:2.1rem] lg:[--c2-aisle:1.3rem]
+                   xl:[--c2-seat:2.35rem] xl:[--c2-aisle:1.45rem]
+                   2xl:[--c2-seat:2.55rem] 2xl:[--c2-aisle:1.6rem]"
       >
         <div className="flex flex-col items-center w-full max-w-full">
           {/* Seating Area Grid Container */}
@@ -505,7 +505,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
                   {rowLabel === "N" && renderC2Header("N-Q")}
 
                   <div
-                    className="grid gap-x-[1px] md:gap-x-3.5 justify-center items-center w-full max-w-full"
+                    className="grid gap-x-[1px] md:gap-x-2 lg:gap-x-2.5 justify-center items-center w-full max-w-full"
                     style={{
                       gridTemplateColumns:
                         "var(--c2-seat) repeat(4, var(--c2-seat)) var(--c2-aisle) repeat(13, var(--c2-seat)) var(--c2-aisle) repeat(5, var(--c2-seat)) var(--c2-seat)",

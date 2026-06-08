@@ -58,12 +58,9 @@ function UltraSeatButton({
       className={seatClass(selected, isReserved)}
     >
       {isReserved ? (
-        <>
-          <span className="md:hidden text-[6px] font-black text-outline">✕</span>
-          <span className="material-symbols-outlined text-outline text-[12px] sm:text-[16px] md:text-[20px] hidden md:inline-block">
-            close
-          </span>
-        </>
+        <span className="text-[10px] font-black text-outline md:text-[14px]">
+          ✕
+        </span>
       ) : (
         <>
           <span className="md:hidden text-[7px] font-black leading-none">{getMobileUltraLabel(seat.label)}</span>
@@ -448,7 +445,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
                       onClick={() => handleSlotChange(index, "")}
                       className="motion-button font-label text-[10px] text-secondary font-bold hover:underline"
                     >
-                      Clear
+                      X
                     </button>
                   )}
                 </div>

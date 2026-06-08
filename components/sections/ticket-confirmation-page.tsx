@@ -8,6 +8,8 @@ import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api";
 import Link from "next/link";
 
+const CASH_RECEIPT_MARKER = "cash://counter-payment";
+
 interface GroupedTicket {
   paymentReference: string | null;
   reservationStatus: string;
@@ -77,7 +79,7 @@ export function TicketConfirmationPage() {
     }
   }, [user, authLoading]);
 
-  const fetchReservations = async () => {
+  async function fetchReservations() {
     try {
       setLoading(true);
       const data = await apiFetch("/reservations/my-reservations");
@@ -98,7 +100,7 @@ export function TicketConfirmationPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const getStatusBadge = (resStatus: string, payStatus: string, receiptUrl: string | null) => {
     if (resStatus === "CONFIRMED" && payStatus === "PAID") {
@@ -106,6 +108,13 @@ export function TicketConfirmationPage() {
         label: "PAID & SECURED",
         classes: "bg-emerald-500 text-white border-black",
         shadow: "yellow" as const,
+      };
+    }
+    if (resStatus === "PENDING" && receiptUrl === CASH_RECEIPT_MARKER) {
+      return {
+        label: "AWAITING CASH APPROVAL",
+        classes: "bg-yellow-400 text-black border-black",
+        shadow: "black" as const,
       };
     }
     if (resStatus === "PENDING" && receiptUrl) {
@@ -186,28 +195,6 @@ export function TicketConfirmationPage() {
     );
   };
 
-  const handlePrint = (ticket: GroupedTicket) => {
-    if (ticket.ticketUrls && ticket.ticketUrls.length > 0) {
-      ticket.ticketUrls.forEach((url) => {
-        // FE-LOW-01 FIX: Validate ticket URL domain before opening
-        try {
-          const parsed = new URL(url);
-          const isTrusted = parsed.protocol === 'https:' &&
-            (parsed.hostname.endsWith('.supabase.co') || parsed.hostname.endsWith('.supabase.in'));
-          if (isTrusted) {
-            window.open(url, "_blank");
-          } else {
-            console.warn("Blocked untrusted ticket URL:", parsed.hostname);
-          }
-        } catch {
-          console.warn("Invalid ticket URL format:", url);
-        }
-      });
-    } else {
-      window.print();
-    }
-  };
-
   if (authLoading || (loading && user)) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -219,7 +206,7 @@ export function TicketConfirmationPage() {
   // Not Authenticated State
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-md px-4 py-16">
+      <div className="mx-auto w-full max-w-md px-4 pb-16 pt-20 lg:pt-12">
         <HardShadowCard shadow="black">
           <div className="p-4 text-center space-y-6 flex flex-col items-center">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-tertiary-fixed text-on-background shadow-[2px_2px_0_0_#1c1b1b]">
@@ -261,7 +248,7 @@ export function TicketConfirmationPage() {
   const ticketGroups = groupReservations();
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8 pb-12">
+    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 pb-12 pt-8 md:px-12 lg:pt-10">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <SectionTitle 
           title="My Tickets" 
@@ -298,7 +285,7 @@ export function TicketConfirmationPage() {
                   No Tickets Booked Yet
                 </h3>
                 <p className="font-body-md text-xs text-outline leading-relaxed">
-                  You don't have any ticket transactions recorded under your account. Select your seats now to secure a movie ticket!
+                  You don&apos;t have any ticket transactions recorded under your account. Select your seats now to secure a movie ticket!
                 </p>
               </div>
               <Link href="/seats">
@@ -396,14 +383,33 @@ export function TicketConfirmationPage() {
                       </div>
 
                       {ticket.reservationStatus === "CONFIRMED" && (
-                        <div className="mt-6">
-                          <PrimaryButton onClick={() => handlePrint(ticket)} tone="primary" className="w-full">
-                            Print Ticket
-                          </PrimaryButton>
+                        <div className="mt-4 flex flex-col items-center p-3 bg-[#fffdf5] border-2 border-black rounded shadow-[4px_4px_0_0_#1c1b1b] space-y-2">
+                          <span className="font-label text-[10px] font-black uppercase text-[#bb0014]">
+                            ⚡ SCAN TO ADMIT / VERIFY
+                          </span>
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                              `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"}/tickets/verify?reference=${encodeURIComponent(
+                                ticket.paymentReference || ""
+                              )}&seat=${encodeURIComponent(
+                                ticket.seats.join(", ")
+                              )}&name=${encodeURIComponent(
+                                user?.name || ""
+                              )}&email=${encodeURIComponent(
+                                user?.email || ""
+                              )}`
+                            )}`}
+                            alt="Ticket QR Code"
+                            width={160}
+                            height={160}
+                            className="border-2 border-black bg-white"
+                          />
+                          <p className="font-body-md text-[9px] text-center text-outline leading-tight">
+                            Present this QR Code to the ticket checker at the cinema gate.
+                          </p>
                         </div>
                       )}
                     </div>
-
                   </div>
                 </HardShadowCard>
               </div>

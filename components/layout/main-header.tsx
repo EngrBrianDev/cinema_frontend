@@ -136,23 +136,7 @@ export function MainHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Initialize and render Google Login button when Google script is loaded
-  useEffect(() => {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      if (typeof window !== "undefined" && (window as any).google) {
-        clearInterval(interval);
-        initGoogleSignIn();
-      } else {
-        attempts++;
-        if (attempts > 20) clearInterval(interval); // Stop polling after 10s
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [user]); // Re-init if login state changes
-
-  const initGoogleSignIn = () => {
+  function initGoogleSignIn() {
     if (typeof window === "undefined" || !(window as any).google || user) return;
 
     try {
@@ -179,7 +163,23 @@ export function MainHeader() {
     } catch (err) {
       console.error("Error initializing Google login:", err);
     }
-  };
+  }
+
+  // Initialize and render Google Login button when Google script is loaded
+  useEffect(() => {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      if (typeof window !== "undefined" && (window as any).google) {
+        clearInterval(interval);
+        initGoogleSignIn();
+      } else {
+        attempts++;
+        if (attempts > 20) clearInterval(interval); // Stop polling after 10s
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [user]); // Re-init if login state changes
 
   return (
     <header
@@ -190,17 +190,14 @@ export function MainHeader() {
         <div className="flex min-h-14 items-center justify-between gap-2 sm:gap-4 lg:min-h-0 lg:flex-1">
         {/* Left Side: Brand and Links */}
         <div className="flex min-w-0 items-center gap-4 lg:gap-7">
-          <div
-            className="shrink-0 overflow-hidden rounded-lg bg-white p-1 shadow-sm"
-            aria-label="Inspire Cinema"
-          >
+          <div className="shrink-0" aria-label="Inspire Cinema">
             <Image
-              src="/image/cinemalogo.png"
+              src="/image/cinemalogo4.png"
               alt="Inspire Cinema"
               width={1659}
               height={948}
               priority
-              className="h-auto w-16 rounded-md object-contain sm:w-20 lg:w-20"
+              className="h-auto w-20 object-contain min-[380px]:w-24 sm:w-28 lg:w-32 [min-width:1800px]:w-36 [min-width:2400px]:w-40"
             />
           </div>
           <nav className="hidden items-center gap-4 lg:flex lg:gap-6" aria-label="Primary navigation">

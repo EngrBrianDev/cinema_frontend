@@ -283,7 +283,7 @@ export function MainFooter() {
               aria-label="Inspire Cinema home"
             >
               <Image
-                src="/image/cinemalogo.png"
+                src="/image/cinemalogo3.png"
                 alt="Inspire Cinema"
                 width={661}
                 height={377}
