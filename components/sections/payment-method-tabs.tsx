@@ -9,7 +9,7 @@ import {
 } from "@/lib/checkout-reservations";
 import { useAuth } from "@/context/auth-context";
 
-const methods = ["gcash", "card", "cash"] as const;
+const methods = ["gcash", "card"] as const;
 type Method = (typeof methods)[number];
 
 type CheckoutSummary = {
@@ -51,10 +51,6 @@ function getInitialMethod(summary: CheckoutSummary | null): Method {
     return "card";
   }
 
-  if (summary?.paymentMethod === "cash") {
-    return "cash";
-  }
-
   return "gcash";
 }
 
@@ -64,12 +60,12 @@ export function PaymentMethodTabs() {
   const router = useRouter();
   const { user } = useAuth();
 
+  const [redirectPath, setRedirectPath] = useState("/");
+
   // GCash state
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // PayPal redirection is handled via hosted page
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,8 +86,6 @@ export function PaymentMethodTabs() {
       reader.readAsDataURL(file);
     }
   };
-
-
 
   const handlePayment = async () => {
     if (!summary) {
@@ -143,22 +137,10 @@ export function PaymentMethodTabs() {
         });
 
         // GCash Success Modal Setup
+        setRedirectPath("/");
         setModalTitle("Thank you for your payment");
         setModalBody(
           "You will receive ticket via your registered email on or before 24 hours.\n\nIf you still haven't receive your ticket on or before 24 hours. Please reach out us at info@inspire-alliance.com"
-        );
-        setModalOpen(true);
-      } else if (method === "cash") {
-        await apiFetch("/payments/cash/submit", {
-          method: "POST",
-          body: {
-            reservationIds: resIds,
-          },
-        });
-
-        setModalTitle("Cash payment submitted");
-        setModalBody(
-          "Your cash payment has been submitted and is waiting for approval.\n\nYour ticket will be issued once the cinema staff confirms your payment."
         );
         setModalOpen(true);
       } else {
@@ -211,7 +193,7 @@ export function PaymentMethodTabs() {
     setModalOpen(false);
     localStorage.removeItem("checkout_summary");
     sessionStorage.removeItem("checkout_entry_allowed");
-    router.push("/");
+    router.push(redirectPath);
   };
 
   const handleConfirmCancel = async () => {
@@ -238,7 +220,7 @@ export function PaymentMethodTabs() {
       )}
 
       {/* Payment tabs */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2">
         {methods.map((item) => (
           <button
             key={item}
@@ -249,7 +231,7 @@ export function PaymentMethodTabs() {
             disabled={paymentTabsLocked}
             aria-disabled={paymentTabsLocked}
             className={[
-              "border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+              "border-4 p-3 font-headline text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
               paymentTabsLocked
                 ? "cursor-not-allowed border-outline-variant bg-on-background/10 text-outline opacity-50 shadow-none"
                 : method === item
@@ -257,7 +239,7 @@ export function PaymentMethodTabs() {
                   : "bg-surface-variant border-outline hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background",
             ].join(" ")}
           >
-            {item === "gcash" ? "GCash QR" : item === "card" ? "PayPal / Card" : "Cash"}
+            {item === "gcash" ? "GCash QR" : "PayPal / Card"}
           </button>
         ))}
       </div>
@@ -291,27 +273,6 @@ export function PaymentMethodTabs() {
               />
               <span className="font-label text-[10px] uppercase font-bold text-outline">
                 Supports Visa, Mastercard, AMEX, Discover
-              </span>
-            </div>
-          </div>
-        ) : method === "cash" ? (
-          <div className="space-y-5 text-center py-6 px-4 flex flex-col items-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center border-4 border-on-background bg-tertiary-fixed text-on-background shadow-[2px_2px_0_0_#1c1b1b]">
-              <span className="font-headline text-2xl font-black">₱</span>
-            </div>
-
-            <div className="space-y-2 max-w-sm">
-              <h3 className="font-headline text-lg font-black uppercase text-secondary">
-                Pay Cash at Counter
-              </h3>
-              <p className="font-body-md text-xs text-outline leading-relaxed">
-                Pay at the cinema counter/Staff submit this booking for payment approval. Your ticket will be issued after staff confirms your cash payment.
-              </p>
-            </div>
-
-            <div className="w-full border-t border-on-background/10 pt-4">
-              <span className="font-label text-[10px] uppercase font-bold text-outline">
-                Amount due: ₱{totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </span>
             </div>
           </div>
@@ -397,7 +358,7 @@ export function PaymentMethodTabs() {
       >
         {isSubmitting
           ? (method === "card" ? "Redirecting to PayPal..." : "Processing Payment...")
-          : (method === "card" ? "Proceed to PayPal" : method === "cash" ? "Submit Cash Payment" : "Complete Payment")}
+          : (method === "card" ? "Proceed to PayPal" : "Complete Payment")}
       </button>
 
       <button
