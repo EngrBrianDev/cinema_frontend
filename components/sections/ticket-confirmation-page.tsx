@@ -396,14 +396,33 @@ export function TicketConfirmationPage() {
                       </div>
 
                       {ticket.reservationStatus === "CONFIRMED" && (
-                        <div className="mt-6">
-                          <PrimaryButton onClick={() => handlePrint(ticket)} tone="primary" className="w-full">
-                            Print Ticket
-                          </PrimaryButton>
+                        <div className="mt-4 flex flex-col items-center p-3 bg-[#fffdf5] border-2 border-black rounded shadow-[4px_4px_0_0_#1c1b1b] space-y-2">
+                          <span className="font-label text-[10px] font-black uppercase text-[#bb0014]">
+                            ⚡ SCAN TO ADMIT / VERIFY
+                          </span>
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                              `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"}/tickets/verify?reference=${encodeURIComponent(
+                                ticket.paymentReference || ""
+                              )}&seat=${encodeURIComponent(
+                                ticket.seats.join(", ")
+                              )}&name=${encodeURIComponent(
+                                user?.name || ""
+                              )}&email=${encodeURIComponent(
+                                user?.email || ""
+                              )}`
+                            )}`}
+                            alt="Ticket QR Code"
+                            width={160}
+                            height={160}
+                            className="border-2 border-black bg-white"
+                          />
+                          <p className="font-body-md text-[9px] text-center text-outline leading-tight">
+                            Present this QR Code to the ticket checker at the cinema gate.
+                          </p>
                         </div>
                       )}
                     </div>
-
                   </div>
                 </HardShadowCard>
               </div>

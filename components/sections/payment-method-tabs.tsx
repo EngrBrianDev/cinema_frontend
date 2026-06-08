@@ -9,14 +9,15 @@ import {
 } from "@/lib/checkout-reservations";
 import { useAuth } from "@/context/auth-context";
 
-const methods = ["gcash", "card"] as const;
-type Method = (typeof methods)[number];
-
 export function PaymentMethodTabs() {
-  const [method, setMethod] = useState<Method>("gcash");
+  const { user } = useAuth();
+  const [methods, setMethods] = useState<("gcash" | "card")[]>(["gcash", "card"]);
+  const [method, setMethod] = useState<"gcash" | "card">("gcash");
   const [summary, setSummary] = useState<any>(null);
   const router = useRouter();
-  const { user } = useAuth();
+
+  const [redirectPath, setRedirectPath] = useState("/");
+
 
   // GCash state
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -32,6 +33,8 @@ export function PaymentMethodTabs() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+
+
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -80,6 +83,7 @@ export function PaymentMethodTabs() {
       return;
     }
 
+
     setIsSubmitting(true);
     setError(null);
     let createdReservationIds: string[] = [];
@@ -102,7 +106,7 @@ export function PaymentMethodTabs() {
 
       const resIds = reservationResults.map((r: any) => r.id);
 
-      // Step 2: Charge / Submit receipt
+      // Step 2: Charge / Submit receipt / Cash
       if (method === "gcash") {
         const formData = new FormData();
         formData.append("receipt", receiptFile!);
@@ -114,6 +118,7 @@ export function PaymentMethodTabs() {
         });
 
         // GCash Success Modal Setup
+        setRedirectPath("/");
         setModalTitle("Thank you for your payment");
         setModalBody(
           "You will receive ticket via your registered email on or before 24 hours.\n\nIf you still haven't receive your ticket on or before 24 hours. Please reach out us at info@inspire-alliance.com"
@@ -127,6 +132,7 @@ export function PaymentMethodTabs() {
             reservationIds: resIds,
           },
         });
+
 
         if (result.approvalLink) {
           // FE-MED-01 FIX: Validate PayPal redirect URL domain
@@ -207,7 +213,7 @@ export function PaymentMethodTabs() {
             disabled={paymentTabsLocked}
             aria-disabled={paymentTabsLocked}
             className={[
-              "border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+              "border-4 p-3 font-headline text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
               paymentTabsLocked
                 ? "cursor-not-allowed border-outline-variant bg-on-background/10 text-outline opacity-50 shadow-none"
                 : method === item
@@ -220,9 +226,11 @@ export function PaymentMethodTabs() {
         ))}
       </div>
 
+
       {/* Payment details content */}
       <div className="border-4 border-on-background bg-background p-6 shadow-[4px_4px_0_0_#1c1b1b]">
         {method === "card" ? (
+
           <div className="space-y-5 text-center py-6 px-4 flex flex-col items-center">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-[#0070ba] text-white shadow-[2px_2px_0_0_#1c1b1b]">
               <span className="font-headline text-2xl font-black italic tracking-tighter">P</span>
