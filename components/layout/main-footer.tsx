@@ -274,7 +274,7 @@ export function MainFooter() {
 
   return (
     <footer className="mt-10 border-t-8 border-secondary bg-[#1c1b1b] px-4 py-6 text-white sm:mt-16 sm:px-6 sm:py-10 md:px-10 md:py-12 xl:px-16">
-      <div className="mx-auto w-full max-w-[1440px]">
+      <div className="cinema-wide-container">
         <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 sm:gap-10 md:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr] md:gap-8 lg:gap-12">
           <div className="min-w-0">
             <Link
@@ -283,7 +283,7 @@ export function MainFooter() {
               aria-label="Inspire Cinema home"
             >
               <Image
-                src="/image/cinemalogo.png"
+                src="/image/cinemalogo3.png"
                 alt="Inspire Cinema"
                 width={661}
                 height={377}

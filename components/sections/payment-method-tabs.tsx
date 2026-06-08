@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import {
@@ -12,18 +12,60 @@ import { useAuth } from "@/context/auth-context";
 const methods = ["gcash", "card"] as const;
 type Method = (typeof methods)[number];
 
+type CheckoutSummary = {
+  paymentMethod?: string;
+  seatIds: string[];
+  selectedSeats: string[];
+  cinemaId: string;
+  total: number;
+};
+
+type ReservationResult = {
+  id: string;
+};
+
+type PaypalOrderResult = {
+  approvalLink?: string;
+};
+
+function readCheckoutSummary(): CheckoutSummary | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const stored = localStorage.getItem("checkout_summary");
+  if (!stored) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(stored) as CheckoutSummary;
+  } catch (e: unknown) {
+    console.error("Failed to parse checkout summary:", e);
+    return null;
+  }
+}
+
+function getInitialMethod(summary: CheckoutSummary | null): Method {
+  if (summary?.paymentMethod === "card" || summary?.paymentMethod === "paypal") {
+    return "card";
+  }
+
+  return "gcash";
+}
+
 export function PaymentMethodTabs() {
-  const [method, setMethod] = useState<Method>("gcash");
-  const [summary, setSummary] = useState<any>(null);
+  const [summary] = useState<CheckoutSummary | null>(() => readCheckoutSummary());
+  const [method, setMethod] = useState<Method>(() => getInitialMethod(summary));
   const router = useRouter();
   const { user } = useAuth();
+
+  const [redirectPath, setRedirectPath] = useState("/");
 
   // GCash state
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // PayPal redirection is handled via hosted page
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,23 +74,6 @@ export function PaymentMethodTabs() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalBody, setModalBody] = useState("");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("checkout_summary");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setSummary(parsed);
-          if (parsed.paymentMethod === "card" || parsed.paymentMethod === "paypal") {
-            setMethod("card");
-          }
-        } catch (e) {
-          console.error("Failed to parse checkout summary:", e);
-        }
-      }
-    }
-  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -61,8 +86,6 @@ export function PaymentMethodTabs() {
       reader.readAsDataURL(file);
     }
   };
-
-
 
   const handlePayment = async () => {
     if (!summary) {
@@ -82,11 +105,11 @@ export function PaymentMethodTabs() {
 
     setIsSubmitting(true);
     setError(null);
-    let createdReservationIds: string[] = [];
+    const createdReservationIds: string[] = [];
 
     try {
       // Step 1: Create reservations sequentially so partial holds can be released on failure.
-      const reservationResults = [];
+      const reservationResults: ReservationResult[] = [];
       for (let idx = 0; idx < summary.seatIds.length; idx++) {
         const seatLabel = summary.selectedSeats[idx];
         const reservation = await apiFetch("/reservations", {
@@ -95,12 +118,12 @@ export function PaymentMethodTabs() {
             cinemaId: summary.cinemaId,
             seatNumber: seatLabel,
           },
-        });
+        }) as ReservationResult;
         reservationResults.push(reservation);
         createdReservationIds.push(reservation.id);
       }
 
-      const resIds = reservationResults.map((r: any) => r.id);
+      const resIds = reservationResults.map((r) => r.id);
 
       // Step 2: Charge / Submit receipt
       if (method === "gcash") {
@@ -114,6 +137,7 @@ export function PaymentMethodTabs() {
         });
 
         // GCash Success Modal Setup
+        setRedirectPath("/");
         setModalTitle("Thank you for your payment");
         setModalBody(
           "You will receive ticket via your registered email on or before 24 hours.\n\nIf you still haven't receive your ticket on or before 24 hours. Please reach out us at info@inspire-alliance.com"
@@ -126,7 +150,7 @@ export function PaymentMethodTabs() {
           body: {
             reservationIds: resIds,
           },
-        });
+        }) as PaypalOrderResult;
 
         if (result.approvalLink) {
           // FE-MED-01 FIX: Validate PayPal redirect URL domain
@@ -137,8 +161,8 @@ export function PaymentMethodTabs() {
             if (!isValidPayPal) {
               throw new Error("Invalid payment gateway URL detected. Aborting for your safety.");
             }
-          } catch (urlErr: any) {
-            if (urlErr.message.includes("Invalid payment")) throw urlErr;
+          } catch (urlErr: unknown) {
+            if (urlErr instanceof Error && urlErr.message.includes("Invalid payment")) throw urlErr;
             throw new Error("Invalid approval link received from payment gateway.");
           }
           savePendingPaypalReservationIds(resIds);
@@ -147,7 +171,7 @@ export function PaymentMethodTabs() {
           throw new Error("Failed to retrieve PayPal approval link from the payment gateway.");
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (createdReservationIds.length > 0) {
         try {
           await apiFetch("/reservations/cancel", {
@@ -159,7 +183,7 @@ export function PaymentMethodTabs() {
         }
       }
       console.error("Payment submission failed:", err);
-      setError(err.message || "An unexpected error occurred. Please try again.");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -169,7 +193,7 @@ export function PaymentMethodTabs() {
     setModalOpen(false);
     localStorage.removeItem("checkout_summary");
     sessionStorage.removeItem("checkout_entry_allowed");
-    router.push("/");
+    router.push(redirectPath);
   };
 
   const handleConfirmCancel = async () => {
@@ -207,7 +231,7 @@ export function PaymentMethodTabs() {
             disabled={paymentTabsLocked}
             aria-disabled={paymentTabsLocked}
             className={[
-              "border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+              "border-4 p-3 font-headline text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
               paymentTabsLocked
                 ? "cursor-not-allowed border-outline-variant bg-on-background/10 text-outline opacity-50 shadow-none"
                 : method === item
@@ -233,7 +257,7 @@ export function PaymentMethodTabs() {
                 Pay with PayPal / Card
               </h3>
               <p className="font-body-md text-xs text-outline leading-relaxed">
-                You will be redirected to PayPal's secure page to complete your payment. 
+                You will be redirected to PayPal&apos;s secure page to complete your payment. 
                 You can pay using your <strong>PayPal account</strong> or a <strong>Debit / Credit Card</strong> directly without registering.
               </p>
             </div>
@@ -388,7 +412,7 @@ export function PaymentMethodTabs() {
             </div>
 
             <p className="font-body-md text-sm leading-relaxed text-on-background">
-              You're one step closer to having your ticket. If you cancel now, this checkout will be cleared and you'll need to choose your seats again.
+              You are one step closer to having your ticket. If you cancel now, this checkout will be cleared and you will need to choose your seats again.
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">

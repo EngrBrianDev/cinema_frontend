@@ -183,21 +183,18 @@ export function MainHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b-4 border-secondary bg-primary shadow-[0_4px_0_var(--tertiary-fixed)]">
-      <div className="mx-auto flex max-w-[1440px] flex-col px-3 py-2 sm:px-5 md:px-8 lg:min-h-20 lg:flex-row lg:items-center lg:justify-between lg:gap-4 xl:px-16">
+      <div className="cinema-wide-container flex flex-col px-3 py-2 sm:px-5 md:px-8 lg:h-20 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:py-0 xl:px-16">
         <div className="flex min-h-14 items-center justify-between gap-2 sm:gap-4 lg:min-h-0 lg:flex-1">
         {/* Left Side: Brand and Links */}
         <div className="flex min-w-0 items-center gap-4 lg:gap-7">
-          <div
-            className="shrink-0 overflow-hidden rounded-lg bg-white p-1 shadow-sm"
-            aria-label="Inspire Cinema"
-          >
+          <div className="shrink-0" aria-label="Inspire Cinema">
             <Image
-              src="/image/cinemalogo.png"
+              src="/image/cinemalogo4.png"
               alt="Inspire Cinema"
               width={1659}
               height={948}
               priority
-              className="h-auto w-16 rounded-md object-contain sm:w-20 lg:w-20"
+              className="h-auto w-20 object-contain min-[380px]:w-24 sm:w-28 lg:w-32 [min-width:1800px]:w-36 [min-width:2400px]:w-40"
             />
           </div>
           <nav className="hidden items-center gap-4 lg:flex lg:gap-6" aria-label="Primary navigation">
@@ -232,23 +229,25 @@ export function MainHeader() {
 
         {/* Right Side: Account and Tickets */}
         <div className="relative flex shrink-0 items-center gap-2 sm:gap-3" ref={dropdownRef}>
-          {checkoutLocked ? (
-            <div className="shrink-0 opacity-50" aria-disabled="true" title="Finish payment or cancel checkout first">
-              <button
-                disabled
-                className="railroad-border flex min-h-11 cursor-not-allowed items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed sm:px-4"
-              >
-                <Icon className="h-5 w-5" name="ticket" />
-                <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
-              </button>
-            </div>
-          ) : (
-            <Link href="/ticket" className="shrink-0">
-              <button className="railroad-border flex min-h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
-                <Icon className="h-5 w-5" name="ticket" />
-                <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
-              </button>
-            </Link>
+          {user && (
+            checkoutLocked ? (
+              <div className="shrink-0 opacity-50" aria-disabled="true" title="Finish payment or cancel checkout first">
+                <button
+                  disabled
+                  className="railroad-border flex h-11 cursor-not-allowed items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed sm:px-4"
+                >
+                  <Icon className="h-5 w-5" name="ticket" />
+                  <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
+                </button>
+              </div>
+            ) : (
+              <Link href="/ticket" className="shrink-0">
+                <button className="railroad-border flex h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
+                  <Icon className="h-5 w-5" name="ticket" />
+                  <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
+                </button>
+              </Link>
+            )
           )}
 
           {/* User Avatar Button */}
