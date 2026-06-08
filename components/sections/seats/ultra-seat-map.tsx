@@ -58,12 +58,9 @@ function UltraSeatButton({
       className={seatClass(selected, isReserved)}
     >
       {isReserved ? (
-        <>
-          <span className="md:hidden text-[6px] font-black text-outline">✕</span>
-          <span className="material-symbols-outlined text-outline text-[12px] sm:text-[16px] md:text-[20px] hidden md:inline-block">
-            close
-          </span>
-        </>
+        <span className="text-[10px] font-black text-outline md:text-[14px]">
+          ✕
+        </span>
       ) : (
         <>
           <span className="md:hidden text-[7px] font-black leading-none">{getMobileUltraLabel(seat.label)}</span>
@@ -375,9 +372,6 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
 
   return (
     <div className="w-full flex flex-col items-center pb-40">
-      <SeatScreen />
-
-      {/* Mobile Quick Seating Selector */}
       <div className="w-full max-w-md mx-auto mb-8 md:hidden border-4 border-on-background bg-surface-variant p-5 shadow-[4px_4px_0_0_#1c1b1b]">
         <h3 className="font-headline text-lg font-black uppercase text-secondary mb-4 flex items-center gap-2 select-none">
           <svg className="w-5 h-5 text-secondary fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -445,7 +439,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
                       onClick={() => handleSlotChange(index, "")}
                       className="font-label text-[10px] text-secondary font-bold hover:underline"
                     >
-                      Clear
+                      X
                     </button>
                   )}
                 </div>
@@ -497,6 +491,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
         </div>
       </div>
 
+      <SeatScreen />
       <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-4 select-none">
         Seating Layout Reference (Tap to select)
       </p>
