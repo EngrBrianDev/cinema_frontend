@@ -3,8 +3,8 @@ import { HardShadowCard } from "@/components/ui/hard-shadow-card";
 
 export function AdminDashboardPage() {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+    <div className="motion-panel space-y-6">
+      <div className="motion-stagger grid gap-4 md:grid-cols-3">
         <HardShadowCard shadow="black">
           <p className="font-label text-xs uppercase text-outline">Total Sales</p>
           <p className="mt-2 font-headline text-4xl font-extrabold text-primary">P452,300</p>

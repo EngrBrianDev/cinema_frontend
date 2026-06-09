@@ -136,23 +136,7 @@ export function MainHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Initialize and render Google Login button when Google script is loaded
-  useEffect(() => {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      if (typeof window !== "undefined" && (window as any).google) {
-        clearInterval(interval);
-        initGoogleSignIn();
-      } else {
-        attempts++;
-        if (attempts > 20) clearInterval(interval); // Stop polling after 10s
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [user]); // Re-init if login state changes
-
-  const initGoogleSignIn = () => {
+  function initGoogleSignIn() {
     if (typeof window === "undefined" || !(window as any).google || user) return;
 
     try {
@@ -179,11 +163,30 @@ export function MainHeader() {
     } catch (err) {
       console.error("Error initializing Google login:", err);
     }
-  };
+  }
+
+  // Initialize and render Google Login button when Google script is loaded
+  useEffect(() => {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      if (typeof window !== "undefined" && (window as any).google) {
+        clearInterval(interval);
+        initGoogleSignIn();
+      } else {
+        attempts++;
+        if (attempts > 20) clearInterval(interval); // Stop polling after 10s
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [user]); // Re-init if login state changes
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b-4 border-secondary bg-primary shadow-[0_4px_0_var(--tertiary-fixed)]">
-      <div className="cinema-wide-container flex flex-col px-3 py-2 sm:px-5 md:px-8 lg:h-20 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:py-0 xl:px-16">
+    <header
+      className="fixed inset-x-0 top-0 z-50 border-b-4 border-secondary bg-primary shadow-[0_4px_0_var(--tertiary-fixed)]"
+      style={{ viewTransitionName: "site-header" }}
+    >
+      <div className="mx-auto flex max-w-[1440px] flex-col px-3 py-2 sm:px-5 md:px-8 lg:min-h-20 lg:flex-row lg:items-center lg:justify-between lg:gap-4 xl:px-16">
         <div className="flex min-h-14 items-center justify-between gap-2 sm:gap-4 lg:min-h-0 lg:flex-1">
         {/* Left Side: Brand and Links */}
         <div className="flex min-w-0 items-center gap-4 lg:gap-7">
@@ -201,7 +204,7 @@ export function MainHeader() {
             {visibleNavItems.map((item) => {
               const navigationLocked = checkoutLocked && item.href !== "/checkout";
               const disabled = navigationLocked;
-              const className = `font-label text-sm font-black uppercase transition-colors ${
+              const className = `motion-button font-label text-sm font-black uppercase transition-colors ${
                 pathname === item.href ? "text-tertiary-fixed underline decoration-2 underline-offset-8" : "text-white"
               } ${disabled ? "cursor-not-allowed opacity-50 hover:text-white" : "hover:text-tertiary-fixed"}`;
 
@@ -219,7 +222,7 @@ export function MainHeader() {
               }
 
               return (
-                <Link href={item.href} key={item.href} className={className}>
+                <Link href={item.href} key={item.href} className={className} transitionTypes={["nav-forward"]}>
                   {item.label}
                 </Link>
               );
@@ -229,25 +232,23 @@ export function MainHeader() {
 
         {/* Right Side: Account and Tickets */}
         <div className="relative flex shrink-0 items-center gap-2 sm:gap-3" ref={dropdownRef}>
-          {user && (
-            checkoutLocked ? (
-              <div className="shrink-0 opacity-50" aria-disabled="true" title="Finish payment or cancel checkout first">
-                <button
-                  disabled
-                  className="railroad-border flex h-11 cursor-not-allowed items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed sm:px-4"
-                >
-                  <Icon className="h-5 w-5" name="ticket" />
-                  <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
-                </button>
-              </div>
-            ) : (
-              <Link href="/ticket" className="shrink-0">
-                <button className="railroad-border flex h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
-                  <Icon className="h-5 w-5" name="ticket" />
-                  <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
-                </button>
-              </Link>
-            )
+          {checkoutLocked ? (
+            <div className="shrink-0 opacity-50" aria-disabled="true" title="Finish payment or cancel checkout first">
+              <button
+                disabled
+                className="railroad-border flex min-h-11 cursor-not-allowed items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed sm:px-4"
+              >
+                <Icon className="h-5 w-5" name="ticket" />
+                <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
+              </button>
+            </div>
+          ) : (
+            <Link href="/ticket" className="shrink-0" transitionTypes={["nav-forward"]}>
+              <button className="motion-button railroad-border flex min-h-11 items-center justify-center gap-2 bg-[#1c1b1b] px-3 text-tertiary-fixed transition-transform active:scale-95 cursor-pointer sm:px-4">
+                <Icon className="h-5 w-5" name="ticket" />
+                <span className="hidden font-label text-xs font-black uppercase leading-tight min-[380px]:block sm:text-sm">My Tickets</span>
+              </button>
+            </Link>
           )}
 
           {/* User Avatar Button */}
@@ -255,7 +256,7 @@ export function MainHeader() {
             aria-label="Account Settings"
             disabled={checkoutLocked}
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded border-2 border-white bg-on-background text-tertiary-fixed transition-colors ${
+            className={`motion-button flex h-11 w-11 shrink-0 items-center justify-center rounded border-2 border-white bg-on-background text-tertiary-fixed transition-colors ${
               checkoutLocked ? "cursor-not-allowed opacity-50" : "hover:bg-secondary cursor-pointer"
             }`}
             title={checkoutLocked ? "Finish payment or cancel checkout first" : undefined}
@@ -271,8 +272,8 @@ export function MainHeader() {
 
           {/* Account Dropdown Menu */}
           <div
-            className={`absolute right-0 top-14 z-50 w-[min(18rem,calc(100vw-1.5rem))] border-4 border-on-background bg-background text-on-background p-4 shadow-[8px_8px_0_var(--tertiary-fixed)] transition-all sm:p-6 ${
-              dropdownOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible pointer-events-none"
+            className={`absolute right-0 top-14 z-50 w-[min(18rem,calc(100vw-1.5rem))] origin-top-right border-4 border-on-background bg-background text-on-background p-4 shadow-[8px_8px_0_var(--tertiary-fixed)] transition-all sm:p-6 ${
+              dropdownOpen ? "opacity-100 translate-y-0 scale-100 visible" : "opacity-0 -translate-y-2 scale-95 invisible pointer-events-none"
             }`}
           >
             {user ? (
@@ -289,7 +290,8 @@ export function MainHeader() {
                     <Link
                       href="/admin"
                       onClick={() => setDropdownOpen(false)}
-                      className="block text-center border-2 border-on-background bg-tertiary-fixed py-2 font-label text-xs font-black uppercase text-on-background hover:bg-[#ffe88f]"
+                      className="motion-button block text-center border-2 border-on-background bg-tertiary-fixed py-2 font-label text-xs font-black uppercase text-on-background hover:bg-[#ffe88f]"
+                      transitionTypes={["nav-forward"]}
                     >
                       Admin Dashboard
                     </Link>
@@ -299,7 +301,7 @@ export function MainHeader() {
                       logout();
                       setDropdownOpen(false);
                     }}
-                    className="w-full text-center border-2 border-on-background bg-secondary py-2 font-label text-xs font-black uppercase text-white hover:bg-red-700 cursor-pointer"
+                    className="motion-button w-full text-center border-2 border-on-background bg-secondary py-2 font-label text-xs font-black uppercase text-white hover:bg-red-700 cursor-pointer"
                   >
                     Sign Out
                   </button>
@@ -326,7 +328,7 @@ export function MainHeader() {
                         alert(`Authentication failed: ${err.message || err}`);
                       }
                     }}
-                    className="w-full border-2 border-on-background bg-tertiary-fixed py-2 font-label text-xs font-black uppercase text-on-background hover:bg-[#ffe88f] cursor-pointer"
+                    className="motion-button w-full border-2 border-on-background bg-tertiary-fixed py-2 font-label text-xs font-black uppercase text-on-background hover:bg-[#ffe88f] cursor-pointer"
                   >
                     Use Dev Login
                   </button>
@@ -347,7 +349,7 @@ export function MainHeader() {
           {visibleNavItems.map((item) => {
             const navigationLocked = checkoutLocked && item.href !== "/checkout";
             const disabled = navigationLocked;
-            const className = `flex min-h-10 items-center justify-center border-2 px-2 text-center font-label text-[11px] font-black uppercase leading-tight transition-colors sm:text-xs ${
+            const className = `motion-button flex min-h-10 items-center justify-center border-2 px-2 text-center font-label text-[11px] font-black uppercase leading-tight transition-colors sm:text-xs ${
               pathname === item.href
                 ? "border-tertiary-fixed bg-tertiary-fixed text-on-background"
                 : "border-white/40 bg-white/5 text-white"
@@ -367,7 +369,7 @@ export function MainHeader() {
             }
 
             return (
-              <Link href={item.href} key={item.href} className={className}>
+              <Link href={item.href} key={item.href} className={className} transitionTypes={["nav-forward"]}>
                 {item.label}
               </Link>
             );
