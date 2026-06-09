@@ -9,8 +9,8 @@ import {
 } from "@/lib/checkout-reservations";
 import { useAuth } from "@/context/auth-context";
 
-const methods = ["gcash", "card"] as const;
-type Method = (typeof methods)[number];
+const visibleMethods = ["gcash"] as const;
+type Method = "gcash" | "card";
 
 type CheckoutSummary = {
   paymentMethod?: string;
@@ -47,10 +47,7 @@ function readCheckoutSummary(): CheckoutSummary | null {
 }
 
 function getInitialMethod(summary: CheckoutSummary | null): Method {
-  if (summary?.paymentMethod === "card" || summary?.paymentMethod === "paypal") {
-    return "card";
-  }
-
+  void summary;
   return "gcash";
 }
 
@@ -220,8 +217,8 @@ export function PaymentMethodTabs() {
       )}
 
       {/* Payment tabs */}
-      <div className="grid gap-3 grid-cols-2">
-        {methods.map((item) => (
+      <div className="grid gap-3">
+        {visibleMethods.map((item) => (
           <button
             key={item}
             onClick={() => {
@@ -239,45 +236,14 @@ export function PaymentMethodTabs() {
                   : "bg-surface-variant border-outline hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background",
             ].join(" ")}
           >
-            {item === "gcash" ? "GCash QR" : "PayPal / Card"}
+            GCash QR
           </button>
         ))}
       </div>
 
       {/* Payment details content */}
       <div key={method} className="motion-tab-content border-4 border-on-background bg-background p-6 shadow-[4px_4px_0_0_#1c1b1b]">
-        {method === "card" ? (
-          <div className="space-y-5 text-center py-6 px-4 flex flex-col items-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-[#0070ba] text-white shadow-[2px_2px_0_0_#1c1b1b]">
-              <span className="font-headline text-2xl font-black italic tracking-tighter">P</span>
-            </div>
-            
-            <div className="space-y-2 max-w-sm">
-              <h3 className="font-headline text-lg font-black uppercase text-secondary">
-                Pay with PayPal / Card
-              </h3>
-              <p className="font-body-md text-xs text-outline leading-relaxed">
-                You will be redirected to PayPal&apos;s secure page to complete your payment.
-                You can pay using your <strong>PayPal account</strong> or a <strong>Debit / Credit Card</strong> directly without registering.
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-3 border-t border-on-background/10 pt-4 w-full">
-              <img
-                src="/image/paypal-logo.png"
-                alt="PayPal Logo"
-                className="h-6 object-contain opacity-75"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              <span className="font-label text-[10px] uppercase font-bold text-outline">
-                Supports Visa, Mastercard, AMEX, Discover
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div className="space-y-6 flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* GCash QR */}
             <div className="w-full md:w-1/2 flex flex-col items-center text-center space-y-3">
               <span className="font-label text-xs uppercase font-extrabold text-secondary">
@@ -342,8 +308,7 @@ export function PaymentMethodTabs() {
                 />
               </div>
             </div>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Action CTA */}
@@ -358,9 +323,7 @@ export function PaymentMethodTabs() {
       >
         <span className="inline-flex items-center justify-center gap-2">
           {isSubmitting && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
-          {isSubmitting
-            ? (method === "card" ? "Redirecting to PayPal..." : "Processing Payment...")
-            : (method === "card" ? "Proceed to PayPal" : "Complete Payment")}
+          {isSubmitting ? "Processing Payment..." : "Complete Payment"}
         </span>
       </button>
 

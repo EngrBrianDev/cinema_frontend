@@ -37,12 +37,7 @@ const faqs = [
   {
     question: "When is my seat considered reserved?",
     answer:
-      "A seat is only secured after a successful PayPal or card payment, or after the system receives your GCash submission for review. If you leave PayPal before payment, your seat returns to the available pool.",
-  },
-  {
-    question: "What happens if I go back from PayPal?",
-    answer:
-      "You can return to checkout and try again or choose another method. If another customer completes payment for the same seat first, the system will ask you to return to the seat map and choose again.",
+      "A seat is secured after the system receives your GCash submission for review. If checkout is cancelled before submission, your seat returns to the available pool.",
   },
   {
     question: "How does GCash payment work?",
@@ -52,7 +47,7 @@ const faqs = [
   {
     question: "When will I receive my ticket?",
     answer:
-      "Confirmed PayPal or card payments issue tickets after payment confirmation. GCash bookings are reviewed first, and tickets are sent to the registered email once approved.",
+      "GCash bookings are reviewed first, and tickets are sent to the registered email once approved.",
   },
   {
     question: "Can I cancel before paying?",
@@ -75,7 +70,7 @@ const privacySections = [
   {
     title: "Payment Handling",
     body:
-      "PayPal and card payments are processed through PayPal's secure payment pages. Inspire Cinema does not store full card numbers. GCash receipt screenshots are used only to verify submitted payments.",
+      "GCash receipt screenshots are used only to verify submitted payments. Inspire Cinema uses payment records only for booking review, ticket issuance, and support.",
   },
   {
     title: "Sharing and Service Providers",

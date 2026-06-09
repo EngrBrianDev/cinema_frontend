@@ -137,7 +137,7 @@ export function CheckoutPage() {
           console.error("Failed to check seat availability after PayPal capture error:", availabilityErr);
         }
       }
-      setCaptureError(err.message || "Failed to confirm payment with PayPal. Please try again.");
+      setCaptureError(err.message || "Failed to confirm payment. Please try again.");
     } finally {
       setIsCapturing(false);
       // Clean query parameters from URL
@@ -160,16 +160,16 @@ export function CheckoutPage() {
         } catch (err) {
           console.error("Failed to release PayPal reservations after cancellation:", err);
         }
-        setCancelWarning("Payment was cancelled on PayPal. You may try again or choose another method.");
+        setCancelWarning("Payment was cancelled. You may review your booking again.");
         // Clean query parameters from URL
         router.replace("/checkout");
       } else if (getPendingPaypalReservationIds().length > 0) {
         try {
           await releasePendingPaypalReservations();
-          setCancelWarning("Your PayPal attempt was not completed. You may try again or choose another method.");
+          setCancelWarning("Your previous payment attempt was not completed. You may review your booking again.");
         } catch (err) {
           console.error("Failed to release stale PayPal reservations:", err);
-          setCancelWarning("Your previous PayPal attempt was not completed. Please cancel checkout or try again.");
+          setCancelWarning("Your previous payment attempt was not completed. Please cancel checkout or try again.");
         }
       }
     }
@@ -298,7 +298,7 @@ export function CheckoutPage() {
               Confirming Payment
             </h2>
             <p className="font-body-md text-sm text-outline max-w-xs leading-relaxed">
-              We are verifying and finalizing your transaction with PayPal. Please do not close this window or navigate away.
+              We are verifying and finalizing your transaction. Please do not close this window or navigate away.
             </p>
           </div>
         </HardShadowCard>
@@ -416,7 +416,7 @@ export function CheckoutPage() {
           <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="border-b-4 border-on-background pb-3">
               <p className="font-label text-[10px] font-black uppercase text-outline">
-                PayPal Interrupted
+                Payment Interrupted
               </p>
               <h3 className="mt-1 font-headline text-xl font-black uppercase text-secondary">
                 Payment Not Completed
@@ -424,7 +424,7 @@ export function CheckoutPage() {
             </div>
 
             <p className="font-body-md text-sm leading-relaxed text-on-background">
-              {cancelWarning} Your seats are ready to review again here. You can try PayPal once more or choose another payment method.
+              {cancelWarning} Your seats are ready to review again here.
             </p>
 
             <button
