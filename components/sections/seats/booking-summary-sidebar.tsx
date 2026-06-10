@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
 
 export interface SelectedSeatChip {
   id: string;
@@ -28,7 +27,6 @@ export function BookingSummarySidebar({
   cinemaId,
 }: BookingSummarySidebarProps) {
   const router = useRouter();
-  const { user } = useAuth();
 
   const handleCheckout = () => {
     if (typeof window !== "undefined") {
@@ -43,12 +41,12 @@ export function BookingSummarySidebar({
       };
       localStorage.setItem("checkout_summary", JSON.stringify(summary));
       sessionStorage.setItem("checkout_entry_allowed", "true");
-      router.push("/checkout");
+      router.push("/checkout", { transitionTypes: ["nav-forward"] });
     }
   };
 
   return (
-    <div className="mt-6 w-full border-y-4 border-on-background bg-surface-variant px-4 py-3 shadow-[0_6px_0_0_#1c1b1b] md:px-12 md:py-5">
+    <div className="motion-panel fixed bottom-0 left-0 right-0 z-40 border-t-4 border-on-background bg-surface-variant px-4 py-3 md:px-12 md:py-5 shadow-[0_-6px_0_0_#1c1b1b]">
       <div className="mx-auto w-full max-w-7xl">
         {/* Mobile Layout (< md) */}
         <div className="md:hidden flex flex-col gap-2.5">
@@ -64,7 +62,7 @@ export function BookingSummarySidebar({
                     key={seat.id}
                     onClick={() => onRemoveSeat(seat.id)}
                     title={`Remove ${seat.label}`}
-                    className="inline-flex items-center gap-1 border border-on-background bg-tertiary-fixed px-2 py-0.5 font-label text-[9px] font-extrabold uppercase text-on-background shadow-[1px_1px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                    className="motion-button inline-flex items-center gap-1 border border-on-background bg-tertiary-fixed px-2 py-0.5 font-label text-[9px] font-extrabold uppercase text-on-background shadow-[1px_1px_0_0_#1c1b1b] active:shadow-none"
                   >
                     <span>{seat.label}</span>
                     <span className="text-[8px] font-black">✕</span>
@@ -77,7 +75,6 @@ export function BookingSummarySidebar({
           </div>
 
           {/* Row 2: Price info & Checkout button */}
-          {user && (
           <div className="flex items-center justify-end gap-3">
             <div className="flex items-center gap-2.5">
               <div className="text-right">
@@ -89,13 +86,12 @@ export function BookingSummarySidebar({
               <button
                 disabled={!selectedCount}
                 onClick={handleCheckout}
-                className="border-2 border-on-background bg-secondary px-4 py-2 font-headline text-xs font-black uppercase text-white shadow-[2px_2px_0_0_#1c1b1b] transition-all hover:bg-opacity-95 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                className="motion-button border-2 border-on-background bg-secondary px-4 py-2 font-headline text-xs font-black uppercase text-white shadow-[2px_2px_0_0_#1c1b1b] transition-all hover:bg-opacity-95 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
               >
                 Checkout
               </button>
             </div>
           </div>
-          )}
         </div>
 
         {/* Desktop Layout (>= md) */}
@@ -117,7 +113,7 @@ export function BookingSummarySidebar({
                     key={seat.id}
                     onClick={() => onRemoveSeat(seat.id)}
                     title={`Remove ${seat.label}`}
-                    className="inline-flex items-center gap-1 border-2 border-on-background bg-tertiary-fixed px-2.5 py-1 font-label text-[10px] font-extrabold uppercase text-on-background shadow-[2px_2px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#1c1b1b] hover:bg-secondary hover:text-white active:translate-x-0 active:translate-y-0 active:shadow-none"
+                    className="motion-button inline-flex items-center gap-1 border-2 border-on-background bg-tertiary-fixed px-2.5 py-1 font-label text-[10px] font-extrabold uppercase text-on-background shadow-[2px_2px_0_0_#1c1b1b] transition-all hover:shadow-[3px_3px_0_0_#1c1b1b] hover:bg-secondary hover:text-white active:shadow-none"
                   >
                     <span>{seat.label}</span>
                     <span className="font-extrabold text-[10px] leading-none">✕</span>
@@ -132,7 +128,6 @@ export function BookingSummarySidebar({
           </div>
 
           {/* Right Section: Pricing & Checkout CTA */}
-          {user && (
           <div className="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 border-on-background/10 pt-4 md:pt-0">
             <div className="text-right select-none">
               <p className="font-label text-[10px] uppercase font-extrabold opacity-75">Total Amount</p>
@@ -144,12 +139,11 @@ export function BookingSummarySidebar({
             <button
               disabled={!selectedCount}
               onClick={handleCheckout}
-              className="border-4 border-on-background bg-secondary px-8 py-3.5 font-headline text-base font-extrabold uppercase text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#1c1b1b] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+              className="motion-button border-4 border-on-background bg-secondary px-8 py-3.5 font-headline text-base font-extrabold uppercase text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all hover:shadow-[6px_6px_0_0_#1c1b1b] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               Checkout
             </button>
           </div>
-          )}
         </div>
       </div>
     </div>

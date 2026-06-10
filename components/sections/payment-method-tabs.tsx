@@ -9,8 +9,8 @@ import {
 } from "@/lib/checkout-reservations";
 import { useAuth } from "@/context/auth-context";
 
-const methods = ["gcash", "card"] as const;
-type Method = (typeof methods)[number];
+const visibleMethods = ["gcash"] as const;
+type Method = "gcash" | "card";
 
 type CheckoutSummary = {
   paymentMethod?: string;
@@ -47,10 +47,7 @@ function readCheckoutSummary(): CheckoutSummary | null {
 }
 
 function getInitialMethod(summary: CheckoutSummary | null): Method {
-  if (summary?.paymentMethod === "card" || summary?.paymentMethod === "paypal") {
-    return "card";
-  }
-
+  void summary;
   return "gcash";
 }
 
@@ -212,16 +209,16 @@ export function PaymentMethodTabs() {
   const paymentTabsLocked = isSubmitting;
 
   return (
-    <div className="space-y-6">
+    <div className="motion-panel space-y-6">
       {error && (
-        <div className="border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
+        <div className="motion-error border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
           ⚠️ {error}
         </div>
       )}
 
       {/* Payment tabs */}
-      <div className="grid gap-3 grid-cols-2">
-        {methods.map((item) => (
+      <div className="grid gap-3">
+        {visibleMethods.map((item) => (
           <button
             key={item}
             onClick={() => {
@@ -231,53 +228,22 @@ export function PaymentMethodTabs() {
             disabled={paymentTabsLocked}
             aria-disabled={paymentTabsLocked}
             className={[
-              "border-4 p-3 font-headline text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+              "motion-button border-4 p-3 font-headline text-sm font-extrabold uppercase tracking-wider transition-all shadow-[3px_3px_0_0_#1c1b1b] active:shadow-none",
               paymentTabsLocked
                 ? "cursor-not-allowed border-outline-variant bg-on-background/10 text-outline opacity-50 shadow-none"
                 : method === item
                   ? "bg-secondary text-white border-on-background"
-                  : "bg-surface-variant border-outline hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background",
+                  : "bg-surface-variant border-outline hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background",
             ].join(" ")}
           >
-            {item === "gcash" ? "GCash QR" : "PayPal / Card"}
+            GCash QR
           </button>
         ))}
       </div>
 
       {/* Payment details content */}
-      <div className="border-4 border-on-background bg-background p-6 shadow-[4px_4px_0_0_#1c1b1b]">
-        {method === "card" ? (
-          <div className="space-y-5 text-center py-6 px-4 flex flex-col items-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-4 border-on-background bg-[#0070ba] text-white shadow-[2px_2px_0_0_#1c1b1b]">
-              <span className="font-headline text-2xl font-black italic tracking-tighter">P</span>
-            </div>
-            
-            <div className="space-y-2 max-w-sm">
-              <h3 className="font-headline text-lg font-black uppercase text-secondary">
-                Pay with PayPal / Card
-              </h3>
-              <p className="font-body-md text-xs text-outline leading-relaxed">
-                You will be redirected to PayPal&apos;s secure page to complete your payment. 
-                You can pay using your <strong>PayPal account</strong> or a <strong>Debit / Credit Card</strong> directly without registering.
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-3 border-t border-on-background/10 pt-4 w-full">
-              <img
-                src="/image/paypal-logo.png"
-                alt="PayPal Logo"
-                className="h-6 object-contain opacity-75"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              <span className="font-label text-[10px] uppercase font-bold text-outline">
-                Supports Visa, Mastercard, AMEX, Discover
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6 flex flex-col md:flex-row gap-6 items-center justify-between">
+      <div key={method} className="motion-tab-content border-4 border-on-background bg-background p-6 shadow-[4px_4px_0_0_#1c1b1b]">
+        <div className="space-y-6 flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* GCash QR */}
             <div className="w-full md:w-1/2 flex flex-col items-center text-center space-y-3">
               <span className="font-label text-xs uppercase font-extrabold text-secondary">
@@ -303,7 +269,7 @@ export function PaymentMethodTabs() {
               
               <div
                 onClick={() => !isSubmitting && fileInputRef.current?.click()}
-                className={`border-4 border-dashed border-outline hover:border-secondary bg-surface-variant flex flex-col items-center justify-center p-6 text-center cursor-pointer min-h-[180px] transition-colors relative ${
+                className={`motion-input border-4 border-dashed border-outline hover:border-secondary bg-surface-variant flex flex-col items-center justify-center p-6 text-center cursor-pointer min-h-[180px] transition-colors relative ${
                   receiptPreview ? "p-2" : ""
                 }`}
               >
@@ -312,7 +278,7 @@ export function PaymentMethodTabs() {
                     <img
                       src={receiptPreview}
                       alt="Receipt Preview"
-                      className="max-h-[130px] object-contain border-2 border-on-background mb-2"
+                      className="motion-panel max-h-[130px] object-contain border-2 border-on-background mb-2"
                     />
                     <span className="font-label text-[9px] uppercase font-bold bg-secondary text-white px-2 py-0.5 rounded shadow-[1px_1px_0_0_#1c1b1b]">
                       Selected: {receiptFile?.name}
@@ -342,38 +308,38 @@ export function PaymentMethodTabs() {
                 />
               </div>
             </div>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Action CTA */}
       <button
         onClick={handlePayment}
         disabled={isSubmitting || !summary}
-        className={`w-full border-4 border-on-background p-4 font-headline text-base font-extrabold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed ${
+        className={`motion-button w-full border-4 border-on-background p-4 font-headline text-base font-extrabold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed ${
           isSubmitting
             ? "bg-outline"
-            : "bg-secondary hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+            : "bg-secondary hover:shadow-[6px_6px_0_0_#1c1b1b] active:shadow-none"
         }`}
       >
-        {isSubmitting
-          ? (method === "card" ? "Redirecting to PayPal..." : "Processing Payment...")
-          : (method === "card" ? "Proceed to PayPal" : "Complete Payment")}
+        <span className="inline-flex items-center justify-center gap-2">
+          {isSubmitting && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
+          {isSubmitting ? "Processing Payment..." : "Complete Payment"}
+        </span>
       </button>
 
       <button
         type="button"
         onClick={() => setCancelModalOpen(true)}
         disabled={isSubmitting}
-        className="w-full border-4 border-on-background bg-background p-3 font-headline text-sm font-extrabold uppercase tracking-wide text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-surface-variant hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+        className="motion-button w-full border-4 border-on-background bg-background p-3 font-headline text-sm font-extrabold uppercase tracking-wide text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:bg-surface-variant hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
       >
         Cancel Checkout
       </button>
 
       {/* Success Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+        <div className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="flex items-center justify-between border-b-4 border-on-background pb-3">
               <h3 className="font-headline text-xl font-black uppercase text-secondary">
                 {modalTitle}
@@ -386,7 +352,7 @@ export function PaymentMethodTabs() {
 
             <button
               onClick={handleModalClose}
-              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              className="motion-button w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
             >
               Back to Movies
             </button>
@@ -397,11 +363,11 @@ export function PaymentMethodTabs() {
       {/* Cancel Confirmation Modal */}
       {cancelModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           aria-modal="true"
           role="dialog"
         >
-          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+          <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="border-b-4 border-on-background pb-3">
               <p className="font-label text-[10px] font-black uppercase text-outline">
                 Cancel Checkout
@@ -419,14 +385,14 @@ export function PaymentMethodTabs() {
               <button
                 type="button"
                 onClick={() => setCancelModalOpen(false)}
-                className="border-4 border-on-background bg-tertiary-fixed p-3 font-headline text-xs font-extrabold uppercase text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                className="motion-button border-4 border-on-background bg-tertiary-fixed p-3 font-headline text-xs font-extrabold uppercase text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
               >
                 Continue Checkout
               </button>
               <button
                 type="button"
                 onClick={handleConfirmCancel}
-                className="border-4 border-on-background bg-secondary p-3 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                className="motion-button border-4 border-on-background bg-secondary p-3 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
               >
                 Yes, Cancel
               </button>
