@@ -146,7 +146,7 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden bg-[#fcf9f8] text-[#1c1b1b]">
       <MainHeader />
 
-      <main className="pt-[7.75rem] lg:pt-20">
+      <main className="pt-32 lg:pt-28">
         {activePromo && (
           <div className="bg-[#ffe16d] border-b-4 border-[#1c1b1b] py-3 px-4 shadow-[inset_0_-4px_0_rgba(0,0,0,0.1)] animate-fade-in">
             <div className="cinema-wide-container flex flex-col sm:flex-row items-center justify-between gap-4">
