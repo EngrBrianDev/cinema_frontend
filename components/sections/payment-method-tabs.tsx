@@ -62,7 +62,7 @@ export function PaymentMethodTabs() {
 
   const [redirectPath, setRedirectPath] = useState("/");
 
-  // GCash state
+  // QRPh state
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,7 +99,7 @@ export function PaymentMethodTabs() {
 
     // Validation
     if (method === "gcash" && !receiptFile) {
-      setError("Please upload your GCash payment receipt first.");
+      setError("Please upload your QRPH payment receipt first.");
       return;
     }
 
@@ -136,7 +136,7 @@ export function PaymentMethodTabs() {
           body: formData,
         });
 
-        // GCash Success Modal Setup
+        // QRPh Success Modal Setup
         setRedirectPath("/");
         setModalTitle("Thank you for your payment");
         setModalBody(
@@ -239,7 +239,7 @@ export function PaymentMethodTabs() {
                   : "bg-surface-variant border-outline hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] hover:border-on-background",
             ].join(" ")}
           >
-            {item === "gcash" ? "GCash QR" : "PayPal / Card"}
+            {item === "gcash" ? "QRPH Payment" : "PayPal / Card"}
           </button>
         ))}
       </div>
@@ -278,20 +278,20 @@ export function PaymentMethodTabs() {
           </div>
         ) : (
           <div className="space-y-6 flex flex-col md:flex-row gap-6 items-center justify-between">
-            {/* GCash QR */}
+            {/* QRPH QR */}
             <div className="w-full md:w-1/2 flex flex-col items-center text-center space-y-3">
               <span className="font-label text-xs uppercase font-extrabold text-secondary">
                 Scan to Pay: ₱{totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </span>
               <div className="border-4 border-on-background p-2 bg-white shadow-[3px_3px_0_0_#1c1b1b]">
                 <img
-                  src="/image/gcash-qr.png"
-                  alt="GCash QR Code"
+                  src="/image/qrph-qr.png"
+                  alt="QRPH QR Code"
                   className="w-48 h-48 object-contain"
                 />
               </div>
-              <p className="font-body-sm text-[11px] text-outline leading-tight max-w-[200px]">
-                Scan the QR code above in your GCash app and send the exact amount.
+              <p className="font-body-sm text-[11px] text-outline leading-tight max-w-[240px]">
+                Scan using <strong>GCash, Maya, GrabPay, ShopeePay, PalawanPay, Coins.ph</strong>, or any major banking app (BDO, BPI, UnionBank, Metrobank, GoTyme, etc.) and upload your receipt.
               </p>
             </div>
 
