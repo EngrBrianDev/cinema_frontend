@@ -11,9 +11,8 @@ const posterSrc = "/image/cinema_ticket.jpg";
 const trailerEmbedSrc = "https://www.youtube.com/embed/mwEGtZ17aao";
 
 const schedule = [
-  { time: "1:00 PM", label: "Ingress" },
-  { time: "2:20 PM", label: "Start Program" },
-  { time: "2:35 PM", label: "Opening Remarks" },
+  { time: "1:30 PM", label: "Ingress" },
+  { time: "2:00 PM", label: "Start of Program" },
   { time: "3:00 PM", label: "Film Showing", featured: true },
 ];
 
