@@ -28,7 +28,7 @@ export function SeatSelectionPage() {
             <div className="mt-4 flex gap-4 font-label text-xs uppercase text-outline-variant">
               <span>Jun 18, 2026</span>
               <span>•</span>
-              <span>1:00 PM - 5:00 PM</span>
+              <span>1:30 PM - 5:00 PM</span>
             </div>
           </div>
         </div>
