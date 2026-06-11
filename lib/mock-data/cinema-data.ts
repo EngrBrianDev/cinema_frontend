@@ -1,9 +1,8 @@
 import type { Buyer, PaymentSummary, TicketInfo } from "@/types/cinema";
 
 export const eventSchedule = [
-  { time: "1:00 PM", label: "Ingress" },
-  { time: "2:20 PM", label: "Start Program" },
-  { time: "2:35 PM", label: "Opening Remarks" },
+  { time: "1:30 PM", label: "Ingress" },
+  { time: "2:00 PM", label: "Start of Program" },
   { time: "3:00 PM", label: "Film Showing" },
 ];
 
