@@ -105,7 +105,7 @@ function renderSlot(
   }
 }
 
-export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
+export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | undefined; pricePerSeat?: number }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [seats, setSeats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -245,7 +245,8 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
     });
   }, [selected, seats]);
 
-  const total = selected.length * config.pricePerSeat;
+  const activePrice = pricePerSeat ?? config.pricePerSeat;
+  const total = selected.length * activePrice;
 
   const removeById = (id: string) => {
     const dbSeat = seats.find((s) => s.id === id);
@@ -545,7 +546,7 @@ export function UltraSeatMap({ cinemaId }: { cinemaId: string | undefined }) {
       </div>
 
       <BookingSummarySidebar
-        pricePerSeat={config.pricePerSeat}
+        pricePerSeat={activePrice}
         selectedCount={selected.length}
         total={total}
         selectedSeats={selectedSeats}

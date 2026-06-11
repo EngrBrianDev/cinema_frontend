@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckoutSeatPreview } from "@/components/sections/checkout-seat-preview";
 import { PaymentMethodTabs } from "@/components/sections/payment-method-tabs";
@@ -9,10 +9,12 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api";
 import {
-  clearPendingPaypalReservationIds,
   getUnavailableSelectedSeats,
-  getPendingPaypalReservationIds,
-  releasePendingPaypalReservations,
+  clearPendingPaymongoReservationIds,
+  clearPendingPaymongoSessionId,
+  getPendingPaymongoReservationIds,
+  getPendingPaymongoSessionId,
+  releasePendingPaymongoReservations,
 } from "@/lib/checkout-reservations";
 
 export function CheckoutPage() {
@@ -28,6 +30,7 @@ export function CheckoutPage() {
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [captureSuccess, setCaptureSuccess] = useState(false);
   const [cancelWarning, setCancelWarning] = useState<string | null>(null);
+  const captureTriggeredRef = useRef(false);
   const [unavailableSeats, setUnavailableSeats] = useState<string[]>([]);
   const [seatUnavailableModalOpen, setSeatUnavailableModalOpen] = useState(false);
 
@@ -96,37 +99,61 @@ export function CheckoutPage() {
     };
   }, [summaryChecked, summary, router]);
 
-  // Check URL parameters for PayPal transaction callback
+  // Check URL parameters for transaction callbacks (QR Ph)
   useEffect(() => {
-    async function handlePaypalReturn() {
+    async function handleReturn() {
+      // Guard: do not clean up or process callback if we are currently capturing or if it was already successful
+      if (isCapturing || captureSuccess || captureTriggeredRef.current) {
+        return;
+      }
+
       const success = searchParams.get("payment_success");
       const cancel = searchParams.get("payment_cancel");
-      const token = searchParams.get("token"); // PayPal Order ID
+      const gateway = searchParams.get("gateway");
 
-      if (success === "true" && token) {
-        handlePaypalCapture(token);
-      } else if (cancel === "true") {
-        try {
-          await releasePendingPaypalReservations();
-        } catch (err) {
-          console.error("Failed to release PayPal reservations after cancellation:", err);
+      const hasCallbackParams = typeof window !== "undefined" && 
+        (window.location.search.includes("payment_success") || window.location.search.includes("payment_cancel"));
+
+      // Hydration Guard: Next.js reads searchParams asynchronously. If the URL contains callback parameters,
+      // wait until searchParams is fully populated before executing check/cleanup to avoid false interruption trigger.
+      if (hasCallbackParams && !gateway) {
+        return;
+      }
+
+      if (gateway === "paymongo") {
+        if (success === "true") {
+          const sessionId = getPendingPaymongoSessionId();
+          if (sessionId) {
+            handlePaymongoCapture(sessionId);
+          } else {
+            setCaptureError("No pending QR Ph payment session found.");
+            router.replace("/checkout");
+          }
+        } else if (cancel === "true") {
+          try {
+            await releasePendingPaymongoReservations();
+          } catch (err) {
+            console.error("Failed to release QR Ph reservations after cancellation:", err);
+          }
+          setCancelWarning("Payment was cancelled on QR Ph. You may try again.");
+          router.replace("/checkout");
         }
-        setCancelWarning("Payment was cancelled on PayPal. You may try again or choose another method.");
-        // Clean query parameters from URL
-        router.replace("/checkout");
-      } else if (getPendingPaypalReservationIds().length > 0) {
-        try {
-          await releasePendingPaypalReservations();
-          setCancelWarning("Your PayPal attempt was not completed. You may try again or choose another method.");
-        } catch (err) {
-          console.error("Failed to release stale PayPal reservations:", err);
-          setCancelWarning("Your previous PayPal attempt was not completed. Please cancel checkout or try again.");
+      } else {
+        // If no callback parameters, clean up stale/abandoned checkout sessions if they exist
+        if (getPendingPaymongoReservationIds().length > 0) {
+          try {
+            await releasePendingPaymongoReservations();
+            setCancelWarning("Your QR Ph payment attempt was not completed. You may try again.");
+          } catch (err) {
+            console.error("Failed to release stale QR Ph reservations:", err);
+            setCancelWarning("Your previous QR Ph attempt was not completed. Please cancel checkout or try again.");
+          }
         }
       }
     }
 
-    handlePaypalReturn();
-  }, [searchParams, router]);
+    handleReturn();
+  }, [searchParams, router, isCapturing, captureSuccess]);
 
   useEffect(() => {
     if (!summaryChecked || !summary || seatUnavailableModalOpen) return;
@@ -156,19 +183,22 @@ export function CheckoutPage() {
     };
   }, [summaryChecked, summary, seatUnavailableModalOpen]);
 
-  const handlePaypalCapture = async (paypalOrderId: string) => {
+
+
+  const handlePaymongoCapture = async (checkoutSessionId: string) => {
     // Prevent double invocation
-    if (isCapturing || captureSuccess) return;
+    if (isCapturing || captureSuccess || captureTriggeredRef.current) return;
+    captureTriggeredRef.current = true;
 
     setIsCapturing(true);
     setCaptureError(null);
     setCancelWarning(null);
 
     try {
-      const result = await apiFetch("/payments/paypal/capture", {
+      const result = await apiFetch("/payments/paymongo/capture", {
         method: "POST",
         body: {
-          paypalOrderId,
+          checkoutSessionId,
         },
       });
 
@@ -182,9 +212,11 @@ export function CheckoutPage() {
       // Clear summary from local storage
       localStorage.removeItem("checkout_summary");
       sessionStorage.removeItem("checkout_entry_allowed");
-      clearPendingPaypalReservationIds();
+      clearPendingPaymongoReservationIds();
+      clearPendingPaymongoSessionId();
     } catch (err: any) {
-      console.error("PayPal Capture failed:", err);
+      console.error("PayMongo Capture failed:", err);
+      captureTriggeredRef.current = false;
       if (summary) {
         try {
           const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
@@ -194,10 +226,10 @@ export function CheckoutPage() {
             return;
           }
         } catch (availabilityErr) {
-          console.error("Failed to check seat availability after PayPal capture error:", availabilityErr);
+          console.error("Failed to check seat availability after PayMongo capture error:", availabilityErr);
         }
       }
-      setCaptureError(err.message || "Failed to confirm payment with PayPal. Please try again.");
+      setCaptureError(err.message || "Failed to confirm payment with PayMongo. Please try again.");
     } finally {
       setIsCapturing(false);
       // Clean query parameters from URL
@@ -207,13 +239,14 @@ export function CheckoutPage() {
 
   const handleUnavailableSeatsConfirm = async () => {
     try {
-      await releasePendingPaypalReservations();
+      await releasePendingPaymongoReservations();
     } catch (err) {
-      console.error("Failed to release pending PayPal reservations:", err);
+      console.error("Failed to release pending PayMongo reservations:", err);
     }
     localStorage.removeItem("checkout_summary");
     sessionStorage.removeItem("checkout_entry_allowed");
-    clearPendingPaypalReservationIds();
+    clearPendingPaymongoReservationIds();
+    clearPendingPaymongoSessionId();
     router.push("/seats");
   };
 
@@ -290,7 +323,7 @@ export function CheckoutPage() {
               Confirming Payment
             </h2>
             <p className="font-body-md text-sm text-outline max-w-xs leading-relaxed">
-              We are verifying and finalizing your transaction with PayPal. Please do not close this window or navigate away.
+              We are verifying and finalizing your transaction. Please do not close this window or navigate away.
             </p>
           </div>
         </HardShadowCard>
@@ -408,7 +441,7 @@ export function CheckoutPage() {
           <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
             <div className="border-b-4 border-on-background pb-3">
               <p className="font-label text-[10px] font-black uppercase text-outline">
-                PayPal Interrupted
+                Payment Interrupted
               </p>
               <h3 className="mt-1 font-headline text-xl font-black uppercase text-secondary">
                 Payment Not Completed
@@ -416,7 +449,7 @@ export function CheckoutPage() {
             </div>
 
             <p className="font-body-md text-sm leading-relaxed text-on-background">
-              {cancelWarning} Your seats are ready to review again here. You can try PayPal once more or choose another payment method.
+              {cancelWarning} Your seats are ready to review again here. You can try to pay once more to complete your booking.
             </p>
 
             <button
