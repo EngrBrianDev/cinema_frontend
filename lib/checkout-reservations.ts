@@ -56,3 +56,61 @@ export async function getUnavailableSelectedSeats(cinemaId: string, selectedSeat
     .map((seat: any) => seat.seatNumber)
     .filter((seatNumber: unknown): seatNumber is string => typeof seatNumber === "string");
 }
+
+const PAYMONGO_PENDING_RESERVATION_IDS_KEY = "paymongo_pending_reservation_ids";
+const PAYMONGO_PENDING_SESSION_ID_KEY = "paymongo_pending_session_id";
+
+export function savePendingPaymongoReservationIds(reservationIds: string[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PAYMONGO_PENDING_RESERVATION_IDS_KEY, JSON.stringify(reservationIds));
+}
+
+export function clearPendingPaymongoReservationIds() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(PAYMONGO_PENDING_RESERVATION_IDS_KEY);
+}
+
+export function getPendingPaymongoReservationIds() {
+  if (typeof window === "undefined") return [];
+
+  const stored = localStorage.getItem(PAYMONGO_PENDING_RESERVATION_IDS_KEY);
+  if (!stored) return [];
+
+  try {
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function savePendingPaymongoSessionId(sessionId: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PAYMONGO_PENDING_SESSION_ID_KEY, sessionId);
+}
+
+export function clearPendingPaymongoSessionId() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(PAYMONGO_PENDING_SESSION_ID_KEY);
+}
+
+export function getPendingPaymongoSessionId() {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(PAYMONGO_PENDING_SESSION_ID_KEY) || "";
+}
+
+export async function releasePendingPaymongoReservations() {
+  const reservationIds = getPendingPaymongoReservationIds();
+  if (!reservationIds.length) return false;
+
+  try {
+    await apiFetch("/reservations/cancel", {
+      method: "POST",
+      body: { reservationIds },
+    });
+    return true;
+  } finally {
+    clearPendingPaymongoReservationIds();
+    clearPendingPaymongoSessionId();
+  }
+}

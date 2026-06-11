@@ -62,12 +62,39 @@ export function SeatTypeTabs() {
   const c2Cinema = cinemas.find((c) => c.type === "C2");
   const ultraCinema = cinemas.find((c) => c.type === "ULTRA");
 
+  const activePromoCinema = cinemas.find((c) => c.activePromotion);
+  const activePromo = activePromoCinema?.activePromotion;
   return (
     <div className="motion-panel space-y-8">
+      {activePromo && (
+        <div className="border-4 border-on-background bg-[#ffe16d] p-4 text-[#1c1b1b] shadow-[4px_4px_0_0_#bb0014] flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl animate-bounce">🎉</span>
+            <div className="text-left">
+              <h4 className="font-headline text-base font-black uppercase tracking-wider text-[#bb0014]">
+                PROMOTION ACTIVE: {activePromo.name}
+              </h4>
+              <p className="font-body-md text-sm mt-1">
+                Enjoy a special ticket price of <span className="font-black text-[#004e9f]">₱{activePromo.promoPrice.toFixed(2)}</span> (normal price: ₱{activePromoCinema?.defaultPrice?.toFixed(2)}) for <span className="font-bold">{activePromoCinema?.name}</span>!
+              </p>
+            </div>
+          </div>
+          <div className="shrink-0 border-2 border-on-background bg-white px-3 py-1.5 font-label text-xs font-black uppercase tracking-wider shadow-[2px_2px_0_0_#1c1b1b]">
+            ⏰ Ends at {new Date(activePromo.endTime).toLocaleTimeString("en-PH", {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Asia/Manila",
+            }) + " PHT"}
+          </div>
+        </div>
+      )}
+
       <div className="motion-stagger flex flex-wrap gap-3">
         {tabs.map((tab) => {
           const config = seatTypeConfigs[tab];
           const isActive = activeTab === tab;
+          const cinemaObj = tab === "c2" ? c2Cinema : ultraCinema;
+          const price = cinemaObj?.currentPrice ?? config.pricePerSeat;
 
           return (
             <button
@@ -82,7 +109,7 @@ export function SeatTypeTabs() {
             >
               {config.label}
               <span className="mt-1 block font-label text-[10px] font-bold normal-case opacity-80">
-                ₱{config.pricePerSeat.toFixed(2)} / seat
+                ₱{price.toFixed(2)} / seat
               </span>
             </button>
           );
@@ -99,11 +126,11 @@ export function SeatTypeTabs() {
 
       {activeTab === "c2" ? (
         <div key="c2" className="motion-tab-content">
-          <C2SeatMap cinemaId={c2Cinema?.id} />
+          <C2SeatMap cinemaId={c2Cinema?.id} pricePerSeat={c2Cinema?.currentPrice} />
         </div>
       ) : (
         <div key="ultra" className="motion-tab-content">
-          <UltraSeatMap cinemaId={ultraCinema?.id} />
+          <UltraSeatMap cinemaId={ultraCinema?.id} pricePerSeat={ultraCinema?.currentPrice} />
         </div>
       )}
     </div>

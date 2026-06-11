@@ -12,7 +12,7 @@ const config = seatTypeConfigs.c2;
 // Row labels in order
 const ROW_ORDER = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q"];
 
-export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
+export function C2SeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | undefined; pricePerSeat?: number }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [seats, setSeats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +116,8 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
     });
   }, [selected, seats]);
 
-  const total = selected.length * config.pricePerSeat;
+  const activePrice = pricePerSeat ?? config.pricePerSeat;
+  const total = selected.length * activePrice;
 
   // Group seats by row Label
   const groupedSeats = useMemo(() => {
@@ -552,7 +553,7 @@ export function C2SeatMap({ cinemaId }: { cinemaId: string | undefined }) {
       </div>
 
       <BookingSummarySidebar
-        pricePerSeat={config.pricePerSeat}
+        pricePerSeat={activePrice}
         selectedCount={selected.length}
         total={total}
         selectedSeats={selectedSeats}
