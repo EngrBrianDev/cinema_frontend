@@ -1,7 +1,11 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MainFooter } from "@/components/layout/main-footer";
 import { MainHeader } from "@/components/layout/main-header";
+import { apiFetch } from "@/lib/api";
 
 const posterSrc = "/image/cinema_ticket.jpg";
 const trailerEmbedSrc = "https://www.youtube.com/embed/mwEGtZ17aao";
@@ -122,11 +126,51 @@ function SponsorMarquee() {
 }
 
 export default function Home() {
+  const [cinemas, setCinemas] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadCinemas() {
+      try {
+        const data = await apiFetch("/cinemas");
+        setCinemas(data || []);
+      } catch (err) {
+        console.error("Failed to load cinemas on home page:", err);
+      }
+    }
+    loadCinemas();
+  }, []);
+
+  const activePromoCinema = cinemas.find(c => c.activePromotion);
+  const activePromo = activePromoCinema?.activePromotion;
+
   return (
     <div className="min-h-screen overflow-hidden bg-[#fcf9f8] text-[#1c1b1b]">
       <MainHeader />
 
       <main className="pt-[7.75rem] lg:pt-20">
+        {activePromo && (
+          <div className="bg-[#ffe16d] border-b-4 border-[#1c1b1b] py-3 px-4 shadow-[inset_0_-4px_0_rgba(0,0,0,0.1)] animate-fade-in">
+            <div className="cinema-wide-container flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl animate-pulse">🔥</span>
+                <div className="text-left">
+                  <p className="font-headline text-sm font-black uppercase text-[#bb0014]">
+                    SPECIAL PROMOTION ACTIVE: {activePromo.name}!
+                  </p>
+                  <p className="font-body-md text-xs text-black mt-0.5 font-bold">
+                    {activePromoCinema.name} tickets are discounted to just <span className="text-[#004e9f] font-black">₱{activePromo.promoPrice.toFixed(2)}</span>!
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/seats"
+                className="shrink-0 border-2 border-on-background bg-[#bb0014] text-white px-4 py-1.5 font-headline text-xs font-black uppercase shadow-[2px_2px_0_0_#1c1b1b] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
+              >
+                Grab Tickets Now 🎟️
+              </Link>
+            </div>
+          </div>
+        )}
         <section className="relative border-b-4 border-[#1c1b1b] bg-[linear-gradient(120deg,#fff8eb_0%,#fcf9f8_52%,#ffe16d_52%,#ffe16d_54%,#fcf9f8_54%)]">
           <div className="cinema-wide-container grid items-center gap-8 px-4 py-8 sm:px-5 md:gap-12 md:px-10 md:py-12 lg:min-h-[720px] lg:grid-cols-[0.92fr_1.08fr] lg:py-14 xl:px-16 [min-width:1800px]:min-h-[820px] [min-width:2400px]:min-h-[940px]">
             <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px] [min-width:1800px]:max-w-[620px] [min-width:2400px]:max-w-[760px]">
