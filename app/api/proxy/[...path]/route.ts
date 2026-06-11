@@ -36,7 +36,7 @@ async function handleProxy(
   headers.set("x-api-key", apiKey);
 
   // 3. Extract the request body
-  let body: any = null;
+  let body: BodyInit | null = null;
   const method = request.method;
   if (!["GET", "HEAD"].includes(method)) {
     const contentType = request.headers.get("content-type") || "";
@@ -50,13 +50,14 @@ async function handleProxy(
   }
 
   try {
-    const response = await fetch(targetUrl, {
+    const fetchOptions: RequestInit & { duplex?: "half" } = {
       method,
       headers,
       body,
-      // @ts-ignore
       duplex: "half", // Required for streaming request bodies in Node/undici environment
-    });
+    };
+
+    const response = await fetch(targetUrl, fetchOptions);
 
     // 4. Copy backend response headers to return to the client
     const responseHeaders = new Headers();
@@ -73,10 +74,11 @@ async function handleProxy(
       status: response.status,
       headers: responseHeaders,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Proxy connection error:", error);
+    const details = error instanceof Error ? error.message : "Unknown proxy error";
     return NextResponse.json(
-      { error: "Failed to connect to backend cinema service", details: error.message },
+      { error: "Failed to connect to backend cinema service", details },
       { status: 502 }
     );
   }

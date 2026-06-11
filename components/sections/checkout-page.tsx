@@ -183,8 +183,6 @@ export function CheckoutPage() {
     };
   }, [summaryChecked, summary, seatUnavailableModalOpen]);
 
-
-
   const handlePaymongoCapture = async (checkoutSessionId: string) => {
     // Prevent double invocation
     if (isCapturing || captureSuccess || captureTriggeredRef.current) return;
@@ -236,7 +234,6 @@ export function CheckoutPage() {
       router.replace("/checkout");
     }
   };
-
   const handleUnavailableSeatsConfirm = async () => {
     try {
       await releasePendingPaymongoReservations();
@@ -298,16 +295,24 @@ export function CheckoutPage() {
 
   if (!summaryChecked || !summary) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="motion-card w-full max-w-md rounded border-2 border-black bg-white p-6">
+          <div className="motion-loading skeleton-block h-8 w-1/2" />
+          <div className="motion-loading skeleton-block mt-4 h-4 w-full" />
+          <div className="motion-loading skeleton-block mt-3 h-4 w-4/5" />
+        </div>
       </div>
     );
   }
 
   if (authLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="motion-card w-full max-w-md rounded border-2 border-black bg-white p-6">
+          <div className="motion-loading skeleton-block h-8 w-1/2" />
+          <div className="motion-loading skeleton-block mt-4 h-4 w-full" />
+          <div className="motion-loading skeleton-block mt-3 h-4 w-4/5" />
+        </div>
       </div>
     );
   }
@@ -379,16 +384,16 @@ export function CheckoutPage() {
   const seatTypeLabel = summary.seatTypeLabel;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8 overflow-x-hidden pt-10 lg:pt-8">
+    <div className="motion-panel mx-auto w-full max-w-7xl px-4 md:px-12 space-y-8 overflow-x-hidden pt-10 lg:pt-8">
       <SectionTitle title="Secure Checkout" subtitle="Choose your payment method and complete your booking." />
       
       {captureError && (
-        <div className="border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
+        <div className="motion-error border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
           ⚠️ {captureError}
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-12 w-full min-w-0">
+      <div className="motion-stagger grid gap-6 lg:grid-cols-12 w-full min-w-0">
         <div className="space-y-6 lg:col-span-5 min-w-0 overflow-hidden">
           <HardShadowCard shadow="black">
             <p className="font-label text-xs uppercase text-outline">Order Summary</p>
@@ -434,11 +439,11 @@ export function CheckoutPage() {
 
       {cancelWarning && !seatUnavailableModalOpen && !modalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           aria-modal="true"
           role="dialog"
         >
-          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+          <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="border-b-4 border-on-background pb-3">
               <p className="font-label text-[10px] font-black uppercase text-outline">
                 Payment Interrupted
@@ -455,7 +460,7 @@ export function CheckoutPage() {
             <button
               type="button"
               onClick={() => setCancelWarning(null)}
-              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              className="motion-button w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
             >
               Continue Checkout
             </button>
@@ -465,11 +470,11 @@ export function CheckoutPage() {
 
       {seatUnavailableModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           aria-modal="true"
           role="dialog"
         >
-          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+          <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="border-b-4 border-on-background pb-3">
               <p className="font-label text-[10px] font-black uppercase text-outline">
                 Seat Unavailable
@@ -480,13 +485,13 @@ export function CheckoutPage() {
             </div>
 
             <p className="font-body-md text-sm leading-relaxed text-on-background">
-              {unavailableSeats.join(", ")} {unavailableSeats.length === 1 ? "has" : "have"} already been taken by another completed booking. You'll be returned to the seat map to pick available seats.
+              {unavailableSeats.join(", ")} {unavailableSeats.length === 1 ? "has" : "have"} already been taken by another completed booking. You&apos;ll be returned to the seat map to pick available seats.
             </p>
 
             <button
               type="button"
               onClick={handleUnavailableSeatsConfirm}
-              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              className="motion-button w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
             >
               Back to Seat Map
             </button>
@@ -496,8 +501,8 @@ export function CheckoutPage() {
 
       {/* Success Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+        <div className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="flex items-center justify-between border-b-4 border-on-background pb-3">
               <h3 className="font-headline text-xl font-black uppercase text-secondary">
                 {modalTitle}
@@ -510,7 +515,7 @@ export function CheckoutPage() {
 
             <button
               onClick={handleModalClose}
-              className="w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              className="motion-button w-full border-4 border-on-background bg-secondary p-3 font-headline text-sm font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
             >
               Back to Movies
             </button>

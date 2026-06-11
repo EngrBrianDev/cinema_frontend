@@ -79,7 +79,7 @@ export function TicketConfirmationPage() {
     }
   }, [user, authLoading]);
 
-  const fetchReservations = async () => {
+  async function fetchReservations() {
     try {
       setLoading(true);
       const data = await apiFetch("/reservations/my-reservations");
@@ -100,7 +100,7 @@ export function TicketConfirmationPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const getStatusBadge = (resStatus: string, payStatus: string, receiptUrl: string | null) => {
     if (resStatus === "CONFIRMED" && payStatus === "PAID") {
@@ -195,28 +195,6 @@ export function TicketConfirmationPage() {
     );
   };
 
-  const handlePrint = (ticket: GroupedTicket) => {
-    if (ticket.ticketUrls && ticket.ticketUrls.length > 0) {
-      ticket.ticketUrls.forEach((url) => {
-        // FE-LOW-01 FIX: Validate ticket URL domain before opening
-        try {
-          const parsed = new URL(url);
-          const isTrusted = parsed.protocol === 'https:' &&
-            (parsed.hostname.endsWith('.supabase.co') || parsed.hostname.endsWith('.supabase.in'));
-          if (isTrusted) {
-            window.open(url, "_blank");
-          } else {
-            console.warn("Blocked untrusted ticket URL:", parsed.hostname);
-          }
-        } catch {
-          console.warn("Invalid ticket URL format:", url);
-        }
-      });
-    } else {
-      window.print();
-    }
-  };
-
   if (authLoading || (loading && user)) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -307,7 +285,7 @@ export function TicketConfirmationPage() {
                   No Tickets Booked Yet
                 </h3>
                 <p className="font-body-md text-xs text-outline leading-relaxed">
-                  You don't have any ticket transactions recorded under your account. Select your seats now to secure a movie ticket!
+                  You don&apos;t have any ticket transactions recorded under your account. Select your seats now to secure a movie ticket!
                 </p>
               </div>
               <Link href="/seats">

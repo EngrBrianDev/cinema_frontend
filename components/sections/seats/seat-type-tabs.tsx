@@ -33,21 +33,25 @@ export function SeatTypeTabs() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="motion-card w-full max-w-lg rounded border-2 border-black bg-white p-6">
+          <div className="motion-loading skeleton-block h-8 w-1/3" />
+          <div className="motion-loading skeleton-block mt-4 h-4 w-full" />
+          <div className="motion-loading skeleton-block mt-3 h-4 w-5/6" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-sm border-4 border-secondary bg-surface-variant p-6 text-center text-on-background shadow-[4px_4px_0_0_#1c1b1b]">
+      <div className="motion-error rounded-sm border-4 border-secondary bg-surface-variant p-6 text-center text-on-background shadow-[4px_4px_0_0_#1c1b1b]">
         <p className="font-headline text-lg font-bold text-secondary">Error Connection</p>
         <p className="mt-2 text-sm opacity-80">{error}</p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="mt-4 border-4 border-on-background bg-secondary px-5 py-2 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+          className="motion-button mt-4 border-4 border-on-background bg-secondary px-5 py-2 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
         >
           Retry
         </button>
@@ -60,9 +64,8 @@ export function SeatTypeTabs() {
 
   const activePromoCinema = cinemas.find((c) => c.activePromotion);
   const activePromo = activePromoCinema?.activePromotion;
-
   return (
-    <div className="space-y-8">
+    <div className="motion-panel space-y-8">
       {activePromo && (
         <div className="border-4 border-on-background bg-[#ffe16d] p-4 text-[#1c1b1b] shadow-[4px_4px_0_0_#bb0014] flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-center gap-3">
@@ -86,7 +89,7 @@ export function SeatTypeTabs() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="motion-stagger flex flex-wrap gap-3">
         {tabs.map((tab) => {
           const config = seatTypeConfigs[tab];
           const isActive = activeTab === tab;
@@ -98,10 +101,10 @@ export function SeatTypeTabs() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={[
-                "border-4 px-6 py-3 font-headline text-sm font-extrabold uppercase transition-all select-none cursor-pointer",
+                "motion-button border-4 px-6 py-3 font-headline text-sm font-extrabold uppercase transition-all select-none cursor-pointer",
                 isActive
                   ? "border-on-background bg-secondary text-white shadow-[4px_4px_0_0_#1c1b1b]"
-                  : "border-outline bg-background text-on-background hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-none",
+                  : "border-outline bg-background text-on-background hover:shadow-[3px_3px_0_0_#1c1b1b] hover:border-on-background active:shadow-none",
               ].join(" ")}
             >
               {config.label}
@@ -113,7 +116,7 @@ export function SeatTypeTabs() {
         })}
       </div>
 
-      <div className="rounded border-2 border-dashed border-outline bg-background/60 p-4">
+      <div className="motion-panel rounded border-2 border-dashed border-outline bg-background/60 p-4">
         <p className="font-label text-xs uppercase text-outline">
           Viewing: <span className="font-bold text-primary">{activeConfig.cinemaLabel}</span>
           <span className="mx-2">•</span>
@@ -122,9 +125,13 @@ export function SeatTypeTabs() {
       </div>
 
       {activeTab === "c2" ? (
-        <C2SeatMap cinemaId={c2Cinema?.id} pricePerSeat={c2Cinema?.currentPrice} />
+        <div key="c2" className="motion-tab-content">
+          <C2SeatMap cinemaId={c2Cinema?.id} pricePerSeat={c2Cinema?.currentPrice} />
+        </div>
       ) : (
-        <UltraSeatMap cinemaId={ultraCinema?.id} pricePerSeat={ultraCinema?.currentPrice} />
+        <div key="ultra" className="motion-tab-content">
+          <UltraSeatMap cinemaId={ultraCinema?.id} pricePerSeat={ultraCinema?.currentPrice} />
+        </div>
       )}
     </div>
   );

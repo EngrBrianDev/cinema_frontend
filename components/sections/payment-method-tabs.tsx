@@ -10,6 +10,7 @@ import {
 } from "@/lib/checkout-reservations";
 import { useAuth } from "@/context/auth-context";
 
+
 type CheckoutSummary = {
   paymentMethod?: string;
   seatIds: string[];
@@ -40,6 +41,7 @@ function readCheckoutSummary(): CheckoutSummary | null {
     return null;
   }
 }
+
 
 export function PaymentMethodTabs() {
   const [summary] = useState<CheckoutSummary | null>(() => readCheckoutSummary());
@@ -142,9 +144,9 @@ export function PaymentMethodTabs() {
   const totalAmount = summary ? summary.total : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="motion-panel space-y-6">
       {error && (
-        <div className="border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
+        <div className="motion-error border-4 border-secondary bg-secondary/10 p-4 font-body-md text-sm text-secondary font-bold shadow-[2px_2px_0_0_#1c1b1b]">
           ⚠️ {error}
         </div>
       )}
@@ -230,10 +232,10 @@ export function PaymentMethodTabs() {
       <button
         onClick={handlePayment}
         disabled={isSubmitting || !summary}
-        className={`w-full border-4 border-on-background p-4 font-headline text-base font-extrabold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed ${
+        className={`motion-button w-full border-4 border-on-background p-4 font-headline text-base font-extrabold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#1c1b1b] transition-all disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed ${
           isSubmitting
             ? "bg-outline"
-            : "bg-secondary hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+            : "bg-secondary hover:shadow-[6px_6px_0_0_#1c1b1b] active:shadow-none"
         }`}
       >
         {isSubmitting ? "Redirecting to QR Ph..." : "Proceed to QR Ph Payment"}
@@ -243,22 +245,21 @@ export function PaymentMethodTabs() {
         type="button"
         onClick={() => setCancelModalOpen(true)}
         disabled={isSubmitting}
-        className="w-full border-4 border-on-background bg-background p-3 font-headline text-sm font-extrabold uppercase tracking-wide text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-surface-variant hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+        className="motion-button w-full border-4 border-on-background bg-background p-3 font-headline text-sm font-extrabold uppercase tracking-wide text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:bg-surface-variant hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
       >
         Cancel Checkout
       </button>
 
 
 
-
       {/* Cancel Confirmation Modal */}
       {cancelModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           aria-modal="true"
           role="dialog"
         >
-          <div className="w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6 animate-scale-up">
+          <div className="motion-modal w-full max-w-md border-4 border-on-background bg-background p-6 shadow-[8px_8px_0_0_#1c1b1b] space-y-6">
             <div className="border-b-4 border-on-background pb-3">
               <p className="font-label text-[10px] font-black uppercase text-outline">
                 Cancel Checkout
@@ -276,14 +277,14 @@ export function PaymentMethodTabs() {
               <button
                 type="button"
                 onClick={() => setCancelModalOpen(false)}
-                className="border-4 border-on-background bg-tertiary-fixed p-3 font-headline text-xs font-extrabold uppercase text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                className="motion-button border-4 border-on-background bg-tertiary-fixed p-3 font-headline text-xs font-extrabold uppercase text-on-background shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
               >
                 Continue Checkout
               </button>
               <button
                 type="button"
                 onClick={handleConfirmCancel}
-                className="border-4 border-on-background bg-secondary p-3 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                className="motion-button border-4 border-on-background bg-secondary p-3 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
               >
                 Yes, Cancel
               </button>

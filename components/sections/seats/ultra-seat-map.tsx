@@ -19,12 +19,12 @@ const GRID_TEMPLATE =
 
 function seatClass(isSelected: boolean, isReserved: boolean): string {
   return [
-    `flex aspect-square ${SEAT} select-none items-center justify-center rounded-sm border md:border-2 ${SEAT_TEXT} leading-none transition-all duration-100 px-0.5`,
+    `motion-button flex aspect-square ${SEAT} select-none items-center justify-center rounded-sm border md:border-2 ${SEAT_TEXT} leading-none transition-all duration-100 px-0.5`,
     isReserved
       ? "cursor-not-allowed border-outline-variant bg-on-background/10 opacity-30 text-outline"
       : isSelected
         ? "seat-pop border-on-background bg-secondary text-white shadow-none md:shadow-[2px_2px_0_0_#1c1b1b] hover:opacity-90"
-        : "border-outline bg-surface-variant text-on-background shadow-none md:shadow-[1px_1px_0_0_#1c1b1b] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0_0_#1c1b1b]",
+        : "border-outline bg-surface-variant text-on-background shadow-none md:shadow-[1px_1px_0_0_#1c1b1b] hover:shadow-[2px_2px_0_0_#1c1b1b] hover:border-on-background active:shadow-[1px_1px_0_0_#1c1b1b]",
   ].join(" ");
 }
 
@@ -349,21 +349,24 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="motion-card w-full max-w-4xl rounded border-2 border-black bg-white p-6">
+          <div className="motion-loading skeleton-block h-8 w-1/4" />
+          <div className="motion-loading skeleton-block mt-5 h-32 w-full" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded border-4 border-secondary bg-surface-variant p-6 text-center text-on-background shadow-[4px_4px_0_0_#1c1b1b]">
+      <div className="motion-error rounded border-4 border-secondary bg-surface-variant p-6 text-center text-on-background shadow-[4px_4px_0_0_#1c1b1b]">
         <p className="font-headline text-lg font-bold text-secondary">Seating Error</p>
         <p className="mt-2 text-sm opacity-80">{error}</p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="mt-4 border-4 border-on-background bg-secondary px-5 py-2 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+          className="motion-button mt-4 border-4 border-on-background bg-secondary px-5 py-2 font-headline text-xs font-extrabold uppercase text-white shadow-[3px_3px_0_0_#1c1b1b] transition-all hover:shadow-[5px_5px_0_0_#1c1b1b] active:shadow-none"
         >
           Retry
         </button>
@@ -372,8 +375,11 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
   }
 
   return (
-    <div className="w-full flex flex-col items-center pb-40">
-      <div className="w-full max-w-md mx-auto mb-8 md:hidden border-4 border-on-background bg-surface-variant p-5 shadow-[4px_4px_0_0_#1c1b1b]">
+    <div className="motion-panel w-full flex flex-col items-center pb-40">
+      <SeatScreen />
+
+      {/* Mobile Quick Seating Selector */}
+      <div className="motion-card w-full max-w-md mx-auto mb-8 md:hidden border-4 border-on-background bg-surface-variant p-5 shadow-[4px_4px_0_0_#1c1b1b]">
         <h3 className="font-headline text-lg font-black uppercase text-secondary mb-4 flex items-center gap-2 select-none">
           <svg className="w-5 h-5 text-secondary fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 4c0-1.1.9-2 2-2h12a2 2 0 0 1 2 2v5.17a3 3 0 0 0 0 5.66V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5.17a3 3 0 0 0 0-5.66V4zm2 2v3.17c1.78.89 3 2.72 3 4.83 0 2.11-1.22 3.94-3 4.83V20h12v-3.17a5.002 5.002 0 0 1 0-9.66V6H6zm10 2v2H8V8h8zm0 6v2H8v-2h8z" />
@@ -397,7 +403,7 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
                   setSelected(selected.slice(0, nextQ));
                 }
               }}
-              className="w-10 h-10 border-2 border-on-background bg-background font-black text-lg shadow-[2px_2px_0_0_#1c1b1b] hover:bg-secondary hover:text-white transition-all duration-100 flex items-center justify-center cursor-pointer select-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+              className="motion-button w-10 h-10 border-2 border-on-background bg-background font-black text-lg shadow-[2px_2px_0_0_#1c1b1b] hover:bg-secondary hover:text-white transition-all duration-100 flex items-center justify-center cursor-pointer select-none active:shadow-none"
             >
               －
             </button>
@@ -408,7 +414,7 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
                 const nextQ = Math.min(10, quantity + 1);
                 setQuantity(nextQ);
               }}
-              className="w-10 h-10 border-2 border-on-background bg-background font-black text-lg shadow-[2px_2px_0_0_#1c1b1b] hover:bg-secondary hover:text-white transition-all duration-100 flex items-center justify-center cursor-pointer select-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+              className="motion-button w-10 h-10 border-2 border-on-background bg-background font-black text-lg shadow-[2px_2px_0_0_#1c1b1b] hover:bg-secondary hover:text-white transition-all duration-100 flex items-center justify-center cursor-pointer select-none active:shadow-none"
             >
               ＋
             </button>
@@ -431,14 +437,14 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
               : [];
 
             return (
-              <div key={index} className="border-2 border-on-background bg-background p-3 shadow-[2px_2px_0_0_#1c1b1b]">
+              <div key={index} className="motion-panel border-2 border-on-background bg-background p-3 shadow-[2px_2px_0_0_#1c1b1b]">
                 <div className="flex items-center justify-between mb-2">
                   <p className="font-headline text-xs font-black uppercase text-primary">Ticket #{index + 1}</p>
                   {selectedSeat && (
                     <button
                       type="button"
                       onClick={() => handleSlotChange(index, "")}
-                      className="font-label text-[10px] text-secondary font-bold hover:underline"
+                      className="motion-button font-label text-[10px] text-secondary font-bold hover:underline"
                     >
                       X
                     </button>
@@ -459,7 +465,7 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
                           handleSlotChange(index, firstSeat);
                         }
                       }}
-                      className="w-full border-2 border-on-background bg-background px-2 py-1.5 font-headline text-xs font-bold focus:outline-none"
+                      className="motion-input w-full border-2 border-on-background bg-background px-2 py-1.5 font-headline text-xs font-bold focus:outline-none"
                     >
                       <option value="">-- Row --</option>
                       {ROW_ORDER.map((r) => (
@@ -475,7 +481,7 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
                       disabled={!currentRowLabel}
                       value={currentSeatCode || ""}
                       onChange={(e) => handleSlotChange(index, e.target.value)}
-                      className="w-full border-2 border-on-background bg-background px-2 py-1.5 font-headline text-xs font-bold focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="motion-input w-full border-2 border-on-background bg-background px-2 py-1.5 font-headline text-xs font-bold focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="">-- Seat --</option>
                       {availableSeatsInRow.map((s) => (
@@ -492,7 +498,6 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
         </div>
       </div>
 
-      <SeatScreen />
       <p className="md:hidden font-label text-[10px] uppercase text-outline text-center mb-4 select-none">
         Seating Layout Reference (Tap to select)
       </p>

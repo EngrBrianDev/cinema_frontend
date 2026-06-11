@@ -37,12 +37,7 @@ const faqs = [
   {
     question: "When is my seat considered reserved?",
     answer:
-      "A seat is only secured after a successful PayPal or card payment, or after the system receives your GCash submission for review. If you leave PayPal before payment, your seat returns to the available pool.",
-  },
-  {
-    question: "What happens if I go back from PayPal?",
-    answer:
-      "You can return to checkout and try again or choose another method. If another customer completes payment for the same seat first, the system will ask you to return to the seat map and choose again.",
+      "A seat is secured after the system receives your GCash submission for review. If checkout is cancelled before submission, your seat returns to the available pool.",
   },
   {
     question: "How does GCash payment work?",
@@ -52,7 +47,7 @@ const faqs = [
   {
     question: "When will I receive my ticket?",
     answer:
-      "Confirmed PayPal or card payments issue tickets after payment confirmation. GCash bookings are reviewed first, and tickets are sent to the registered email once approved.",
+      "GCash bookings are reviewed first, and tickets are sent to the registered email once approved.",
   },
   {
     question: "Can I cancel before paying?",
@@ -75,7 +70,7 @@ const privacySections = [
   {
     title: "Payment Handling",
     body:
-      "PayPal and card payments are processed through PayPal's secure payment pages. Inspire Cinema does not store full card numbers. GCash receipt screenshots are used only to verify submitted payments.",
+      "GCash receipt screenshots are used only to verify submitted payments. Inspire Cinema uses payment records only for booking review, ticket issuance, and support.",
   },
   {
     title: "Sharing and Service Providers",
@@ -273,8 +268,8 @@ export function MainFooter() {
   const [activeModal, setActiveModal] = useState<FooterModal>(null);
 
   return (
-    <footer className="mt-10 border-t-8 border-secondary bg-[#1c1b1b] px-4 py-6 text-white sm:mt-16 sm:px-6 sm:py-10 md:px-10 md:py-12 xl:px-16">
-      <div className="cinema-wide-container">
+    <footer className="motion-panel mt-10 border-t-8 border-secondary bg-[#1c1b1b] px-4 py-6 text-white sm:mt-16 sm:px-6 sm:py-10 md:px-10 md:py-12 xl:px-16">
+      <div className="mx-auto w-full max-w-[1440px]">
         <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 sm:gap-10 md:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr] md:gap-8 lg:gap-12">
           <div className="min-w-0">
             <Link
@@ -304,7 +299,8 @@ export function MainFooter() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="font-label text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
+                  className="motion-button font-label text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
+                  transitionTypes={["nav-back"]}
                   >
                     {link.label}
                   </Link>
@@ -313,7 +309,7 @@ export function MainFooter() {
                     key={link.label}
                     type="button"
                     onClick={() => setActiveModal(link.modal)}
-                    className="font-label text-left text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
+                    className="motion-button font-label text-left text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
                   >
                     {link.label}
                   </button>
@@ -330,7 +326,7 @@ export function MainFooter() {
                   key={link.label}
                   type="button"
                   onClick={() => setActiveModal(link.modal)}
-                  className="font-label text-left text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
+                  className="motion-button font-label text-left text-xs font-black uppercase text-white transition-colors hover:text-tertiary-fixed"
                 >
                   {link.label}
                 </button>
@@ -348,7 +344,7 @@ export function MainFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Follow Inspire Cinema on ${social.name}`}
-                  className="flex h-11 w-11 items-center justify-center rounded-sm bg-[#c5cad8] text-[#1c1b1b] transition-colors hover:bg-tertiary-fixed"
+                  className="motion-button flex h-11 w-11 items-center justify-center rounded-sm bg-[#c5cad8] text-[#1c1b1b] transition-colors hover:bg-tertiary-fixed"
                 >
                   <SocialIcon name={social.name} />
                 </a>
@@ -366,11 +362,11 @@ export function MainFooter() {
 
       {activeModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in"
+          className="motion-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           aria-modal="true"
           role="dialog"
         >
-          <div className="flex max-h-[74vh] w-full max-w-5xl flex-col border-4 border-on-background bg-background text-on-background shadow-[8px_8px_0_0_#1c1b1b] animate-scale-up">
+          <div className="motion-modal flex max-h-[74vh] w-full max-w-5xl flex-col border-4 border-on-background bg-background text-on-background shadow-[8px_8px_0_0_#1c1b1b]">
             <div className="flex items-start justify-between gap-4 border-b-4 border-on-background p-4">
               <div>
                 <p className="font-label text-[10px] font-black uppercase text-outline">
@@ -383,7 +379,7 @@ export function MainFooter() {
               <button
                 type="button"
                 onClick={() => setActiveModal(null)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center border-4 border-on-background bg-secondary font-headline text-lg font-black text-white shadow-[2px_2px_0_0_#1c1b1b] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#1c1b1b] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                className="motion-button flex h-10 w-10 shrink-0 items-center justify-center border-4 border-on-background bg-secondary font-headline text-lg font-black text-white shadow-[2px_2px_0_0_#1c1b1b] transition-all hover:shadow-[4px_4px_0_0_#1c1b1b] active:shadow-none"
                 aria-label="Close modal"
               >
                 X
