@@ -274,7 +274,7 @@ export default function Home() {
             <Icon className="mb-7 h-12 w-12 text-[#ffe16d]" name="movie" />
             <h3 className="mb-5 font-headline text-[clamp(1.6rem,7vw,1.875rem)] uppercase leading-tight tracking-normal">Venue Info</h3>
             <div className="space-y-2 font-body-md text-base sm:text-lg">
-              <p className="font-bold text-[#ffe16d]">Cinema 2, 3rd Floor</p>
+              <p className="font-bold text-[#ffe16d]">Cinema 2 & Ultra Cinema, 4th Floor</p>
               <p>Uptown Mall, BGC</p>
               <p>Taguig City</p>
             </div>
