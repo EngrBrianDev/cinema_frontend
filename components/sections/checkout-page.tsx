@@ -17,6 +17,28 @@ import {
   releasePendingPaymongoReservations,
 } from "@/lib/checkout-reservations";
 
+async function checkSummarySeatsAvailability(summary: any) {
+  if (!summary) return [];
+  const unavailable: string[] = [];
+  if (summary.seats && summary.seats.length > 0) {
+    const seatsByCinema: Record<string, string[]> = {};
+    for (const seat of summary.seats) {
+      if (!seatsByCinema[seat.cinemaId]) {
+        seatsByCinema[seat.cinemaId] = [];
+      }
+      seatsByCinema[seat.cinemaId].push(seat.label);
+    }
+    for (const [cinemaId, seatLabels] of Object.entries(seatsByCinema)) {
+      const res = await getUnavailableSelectedSeats(cinemaId, seatLabels);
+      unavailable.push(...res);
+    }
+  } else {
+    const res = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
+    unavailable.push(...res);
+  }
+  return unavailable;
+}
+
 export function CheckoutPage() {
   const [summary, setSummary] = useState<any>(null);
   const [summaryChecked, setSummaryChecked] = useState(false);
@@ -162,7 +184,7 @@ export function CheckoutPage() {
 
     async function checkSelectedSeats() {
       try {
-        const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
+        const unavailable = await checkSummarySeatsAvailability(summary);
         if (!cancelled && unavailable.length > 0) {
           setUnavailableSeats(unavailable);
           setSeatUnavailableModalOpen(true);
@@ -217,7 +239,7 @@ export function CheckoutPage() {
       captureTriggeredRef.current = false;
       if (summary) {
         try {
-          const unavailable = await getUnavailableSelectedSeats(summary.cinemaId, summary.selectedSeats);
+          const unavailable = await checkSummarySeatsAvailability(summary);
           if (unavailable.length > 0) {
             setUnavailableSeats(unavailable);
             setSeatUnavailableModalOpen(true);

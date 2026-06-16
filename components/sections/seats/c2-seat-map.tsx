@@ -12,8 +12,28 @@ const config = seatTypeConfigs.c2;
 // Row labels in order
 const ROW_ORDER = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q"];
 
-export function C2SeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | undefined; pricePerSeat?: number }) {
-  const [selected, setSelected] = useState<string[]>([]);
+export function C2SeatMap({
+  cinemaId,
+  pricePerSeat,
+  selected: propSelected,
+  setSelected: propSetSelected,
+  activePromotion,
+  totalTicketsCount,
+  onSelectedSeatsChange,
+  hideSidebar,
+}: {
+  cinemaId: string | undefined;
+  pricePerSeat?: number;
+  selected?: string[];
+  setSelected?: React.Dispatch<React.SetStateAction<string[]>>;
+  activePromotion?: any;
+  totalTicketsCount?: number;
+  onSelectedSeatsChange?: (selectedSeats: any[]) => void;
+  hideSidebar?: boolean;
+}) {
+  const [localSelected, setLocalSelected] = useState<string[]>([]);
+  const selected = propSelected ?? localSelected;
+  const setSelected = propSetSelected ?? setLocalSelected;
   const [seats, setSeats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,18 +126,28 @@ export function C2SeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | undef
     setSelected((prev) => prev.filter((sn) => sn !== seatNumber));
   };
 
+  const ticketCount = totalTicketsCount ?? selected.length;
+  const isFathersDayPromo = activePromotion?.name === "Fathers Day Super Sale Promotion";
+  const activePrice = isFathersDayPromo
+    ? (ticketCount >= 2 ? (activePromotion.promoPrice ?? 550) : 800)
+    : (pricePerSeat ?? config.pricePerSeat);
+  const total = selected.length * activePrice;
+
   const selectedSeats = useMemo(() => {
     return selected.map((sn) => {
       const dbSeat = seats.find((s) => s.seatNumber === sn);
       return {
         id: dbSeat?.id || sn,
         label: sn,
+        cinemaId,
+        price: activePrice,
       };
     });
-  }, [selected, seats]);
+  }, [selected, seats, cinemaId, activePrice]);
 
-  const activePrice = pricePerSeat ?? config.pricePerSeat;
-  const total = selected.length * activePrice;
+  useEffect(() => {
+    onSelectedSeatsChange?.(selectedSeats);
+  }, [selectedSeats, onSelectedSeatsChange]);
 
   // Group seats by row Label
   const groupedSeats = useMemo(() => {
@@ -552,15 +582,17 @@ export function C2SeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | undef
         </div>
       </div>
 
-      <BookingSummarySidebar
-        pricePerSeat={activePrice}
-        selectedCount={selected.length}
-        total={total}
-        selectedSeats={selectedSeats}
-        onRemoveSeat={removeById}
-        seatTypeLabel={config.label}
-        cinemaId={cinemaId}
-      />
+      {!hideSidebar && (
+        <BookingSummarySidebar
+          pricePerSeat={activePrice}
+          selectedCount={selected.length}
+          total={total}
+          selectedSeats={selectedSeats}
+          onRemoveSeat={removeById}
+          seatTypeLabel={config.label}
+          cinemaId={cinemaId}
+        />
+      )}
     </div>
   );
 }

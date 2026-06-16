@@ -18,6 +18,12 @@ type CheckoutSummary = {
   cinemaId: string;
   total: number;
   seatTypeLabel?: string;
+  seats?: {
+    id: string;
+    label: string;
+    cinemaId: string;
+    price: number;
+  }[];
 };
 
 type ReservationResult = {
@@ -70,13 +76,20 @@ export function PaymentMethodTabs() {
     try {
       // Step 1: Create reservations sequentially so partial holds can be released on failure.
       const reservationResults: ReservationResult[] = [];
-      for (let idx = 0; idx < summary.seatIds.length; idx++) {
-        const seatLabel = summary.selectedSeats[idx];
+      const seats = summary.seats || [];
+      const totalTicketsCount = seats.length > 0 ? seats.length : summary.seatIds.length;
+
+      for (let idx = 0; idx < totalTicketsCount; idx++) {
+        const seat = seats[idx];
+        const seatLabel = seat ? seat.label : summary.selectedSeats[idx];
+        const cinemaId = seat ? seat.cinemaId : summary.cinemaId;
+
         const reservation = await apiFetch("/reservations", {
           method: "POST",
           body: {
-            cinemaId: summary.cinemaId,
+            cinemaId,
             seatNumber: seatLabel,
+            totalTicketsCount,
           },
         }) as ReservationResult;
         reservationResults.push(reservation);
