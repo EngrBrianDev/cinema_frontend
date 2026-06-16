@@ -5,6 +5,7 @@ import type { SeatType } from "@/lib/mock-data/seat-config";
 import { seatTypeConfigs } from "@/lib/mock-data/seat-config";
 import { C2SeatMap } from "@/components/sections/seats/c2-seat-map";
 import { UltraSeatMap } from "@/components/sections/seats/ultra-seat-map";
+import { BookingSummarySidebar, SelectedSeatChip } from "@/components/sections/seats/booking-summary-sidebar";
 import { apiFetch } from "@/lib/api";
 
 const tabs: SeatType[] = ["c2", "ultra"];
@@ -14,6 +15,14 @@ export function SeatTypeTabs() {
   const [cinemas, setCinemas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Lifted selection states for C2 and Ultra
+  const [selectedC2, setSelectedC2] = useState<string[]>([]);
+  const [selectedUltra, setSelectedUltra] = useState<string[]>([]);
+
+  // Selection chips reported by child components
+  const [c2SelectedSeatsChips, setC2SelectedSeatsChips] = useState<SelectedSeatChip[]>([]);
+  const [ultraSelectedSeatsChips, setUltraSelectedSeatsChips] = useState<SelectedSeatChip[]>([]);
 
   useEffect(() => {
     async function loadCinemas() {
@@ -64,6 +73,51 @@ export function SeatTypeTabs() {
 
   const activePromoCinema = cinemas.find((c) => c.activePromotion);
   const activePromo = activePromoCinema?.activePromotion;
+
+  // Combined ticket count across standard/VIP and Cinema 2/Ultra Cinema
+  const globalCount = selectedC2.length + selectedUltra.length;
+
+  const c2Promo = c2Cinema?.activePromotion;
+  let c2Price = c2Cinema?.currentPrice ?? 800;
+  if (c2Promo && c2Promo.name === "Fathers Day Super Sale Promotion") {
+    c2Price = globalCount >= 2 ? Number(c2Promo.promoPrice) : 800;
+  }
+
+  const ultraPromo = ultraCinema?.activePromotion;
+  let ultraPrice = ultraCinema?.currentPrice ?? 1000;
+  if (ultraPromo && ultraPromo.name === "Fathers Day Super Sale Promotion") {
+    ultraPrice = globalCount >= 2 ? Number(ultraPromo.promoPrice) : 1000;
+  }
+
+  const c2Total = selectedC2.length * c2Price;
+  const ultraTotal = selectedUltra.length * ultraPrice;
+  const globalTotal = c2Total + ultraTotal;
+
+  // Combine reported chips and enrich with the globally evaluated price
+  const combinedSelectedSeatsChips: SelectedSeatChip[] = [
+    ...c2SelectedSeatsChips.map((chip) => ({
+      ...chip,
+      price: c2Price,
+    })),
+    ...ultraSelectedSeatsChips.map((chip) => ({
+      ...chip,
+      price: ultraPrice,
+    })),
+  ];
+
+  const handleRemoveSeat = (id: string) => {
+    const c2Chip = c2SelectedSeatsChips.find((s) => s.id === id);
+    if (c2Chip) {
+      setSelectedC2((prev) => prev.filter((sn) => sn !== c2Chip.label));
+      return;
+    }
+    const ultraChip = ultraSelectedSeatsChips.find((s) => s.id === id);
+    if (ultraChip) {
+      setSelectedUltra((prev) => prev.filter((sn) => sn !== ultraChip.label));
+      return;
+    }
+  };
+
   return (
     <div className="motion-panel space-y-8">
       {activePromo && (
@@ -74,9 +128,15 @@ export function SeatTypeTabs() {
               <h4 className="font-headline text-base font-black uppercase tracking-wider text-[#bb0014]">
                 PROMOTION ACTIVE: {activePromo.name}
               </h4>
-              <p className="font-body-md text-sm mt-1">
-                Enjoy a special ticket price of <span className="font-black text-[#004e9f]">₱{activePromo.promoPrice.toFixed(2)}</span> (normal price: ₱{activePromoCinema?.defaultPrice?.toFixed(2)}) for <span className="font-bold">{activePromoCinema?.name}</span>!
-              </p>
+              {activePromo.name === "Fathers Day Super Sale Promotion" ? (
+                <p className="font-body-md text-sm mt-1">
+                  Buy <span className="font-bold">2 or more tickets (mixed or same type)</span> to enjoy a special price of <span className="font-black text-[#004e9f]">₱550.00</span> for <span className="font-bold">Cinema 2</span> and <span className="font-black text-[#004e9f]">₱750.00</span> for <span className="font-bold">Ultra Cinema</span>!
+                </p>
+              ) : (
+                <p className="font-body-md text-sm mt-1">
+                  Enjoy a special ticket price of <span className="font-black text-[#004e9f]">₱{activePromo.promoPrice.toFixed(2)}</span> (normal price: ₱{activePromoCinema?.defaultPrice?.toFixed(2)}) for <span className="font-bold">{activePromoCinema?.name}</span>!
+                </p>
+              )}
             </div>
           </div>
           <div className="shrink-0 border-2 border-on-background bg-white px-3 py-1.5 font-label text-xs font-black uppercase tracking-wider shadow-[2px_2px_0_0_#1c1b1b]">
@@ -94,7 +154,13 @@ export function SeatTypeTabs() {
           const config = seatTypeConfigs[tab];
           const isActive = activeTab === tab;
           const cinemaObj = tab === "c2" ? c2Cinema : ultraCinema;
-          const price = cinemaObj?.currentPrice ?? config.pricePerSeat;
+          
+          let price = cinemaObj?.currentPrice ?? config.pricePerSeat;
+          const isFathersDay = cinemaObj?.activePromotion?.name === "Fathers Day Super Sale Promotion";
+          
+          const subLabel = isFathersDay
+            ? `₱${price.toFixed(2)} / seat (min. 2 seats)`
+            : `₱${price.toFixed(2)} / seat`;
 
           return (
             <button
@@ -109,7 +175,7 @@ export function SeatTypeTabs() {
             >
               {config.label}
               <span className="mt-1 block font-label text-[10px] font-bold normal-case opacity-80">
-                ₱{price.toFixed(2)} / seat
+                {subLabel}
               </span>
             </button>
           );
@@ -126,12 +192,54 @@ export function SeatTypeTabs() {
 
       {activeTab === "c2" ? (
         <div key="c2" className="motion-tab-content">
-          <C2SeatMap cinemaId={c2Cinema?.id} pricePerSeat={c2Cinema?.currentPrice} />
+          <C2SeatMap
+            cinemaId={c2Cinema?.id}
+            pricePerSeat={c2Cinema?.currentPrice}
+            selected={selectedC2}
+            setSelected={setSelectedC2}
+            activePromotion={c2Cinema?.activePromotion}
+            totalTicketsCount={globalCount}
+            onSelectedSeatsChange={setC2SelectedSeatsChips}
+            hideSidebar={true}
+          />
         </div>
       ) : (
         <div key="ultra" className="motion-tab-content">
-          <UltraSeatMap cinemaId={ultraCinema?.id} pricePerSeat={ultraCinema?.currentPrice} />
+          <UltraSeatMap
+            cinemaId={ultraCinema?.id}
+            pricePerSeat={ultraCinema?.currentPrice}
+            selected={selectedUltra}
+            setSelected={setSelectedUltra}
+            activePromotion={ultraCinema?.activePromotion}
+            totalTicketsCount={globalCount}
+            onSelectedSeatsChange={setUltraSelectedSeatsChips}
+            hideSidebar={true}
+          />
         </div>
+      )}
+
+      {globalCount > 0 && (
+        <BookingSummarySidebar
+          pricePerSeat={activeTab === "c2" ? c2Price : ultraPrice}
+          selectedCount={globalCount}
+          total={globalTotal}
+          selectedSeats={combinedSelectedSeatsChips}
+          onRemoveSeat={handleRemoveSeat}
+          seatTypeLabel={
+            selectedC2.length > 0 && selectedUltra.length > 0
+              ? "Cinema 2 & Ultra Cinema"
+              : selectedC2.length > 0
+              ? "Cinema 2"
+              : "Ultra Cinema"
+          }
+          cinemaId={
+            selectedC2.length > 0 && selectedUltra.length > 0
+              ? c2Cinema?.id
+              : selectedC2.length > 0
+              ? c2Cinema?.id
+              : ultraCinema?.id
+          }
+        />
       )}
     </div>
   );

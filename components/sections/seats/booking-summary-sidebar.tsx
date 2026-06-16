@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 export interface SelectedSeatChip {
   id: string;
   label: string;
+  cinemaId?: string;
+  price?: number;
 }
 
 interface BookingSummarySidebarProps {
@@ -33,6 +35,12 @@ export function BookingSummarySidebar({
       const summary = {
         selectedSeats: selectedSeats.map((s) => s.label),
         seatIds: selectedSeats.map((s) => s.id),
+        seats: selectedSeats.map((s) => ({
+          id: s.id,
+          label: s.label,
+          cinemaId: s.cinemaId || cinemaId,
+          price: s.price !== undefined ? s.price : (total / (selectedSeats.length || 1)),
+        })),
         subtotal: total,
         serviceFee: 0,
         total: total,

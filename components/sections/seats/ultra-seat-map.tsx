@@ -105,8 +105,28 @@ function renderSlot(
   }
 }
 
-export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | undefined; pricePerSeat?: number }) {
-  const [selected, setSelected] = useState<string[]>([]);
+export function UltraSeatMap({
+  cinemaId,
+  pricePerSeat,
+  selected: propSelected,
+  setSelected: propSetSelected,
+  activePromotion,
+  totalTicketsCount,
+  onSelectedSeatsChange,
+  hideSidebar,
+}: {
+  cinemaId: string | undefined;
+  pricePerSeat?: number;
+  selected?: string[];
+  setSelected?: React.Dispatch<React.SetStateAction<string[]>>;
+  activePromotion?: any;
+  totalTicketsCount?: number;
+  onSelectedSeatsChange?: (selectedSeats: any[]) => void;
+  hideSidebar?: boolean;
+}) {
+  const [localSelected, setLocalSelected] = useState<string[]>([]);
+  const selected = propSelected ?? localSelected;
+  const setSelected = propSetSelected ?? setLocalSelected;
   const [seats, setSeats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -225,6 +245,13 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
     }
   };
 
+  const ticketCount = totalTicketsCount ?? selected.length;
+  const isFathersDayPromo = activePromotion?.name === "Fathers Day Super Sale Promotion";
+  const activePrice = isFathersDayPromo
+    ? (ticketCount >= 2 ? (activePromotion.promoPrice ?? 750) : 1000)
+    : (pricePerSeat ?? config.pricePerSeat);
+  const total = selected.length * activePrice;
+
   const selectedSeats = useMemo(() => {
     const labelByKey = new Map<string, string>();
     for (const row of ultraAllRowSlots) {
@@ -241,12 +268,15 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
       return {
         id: dbSeat?.id || key,
         label: labelByKey.get(key) ?? key,
+        cinemaId,
+        price: activePrice,
       };
     });
-  }, [selected, seats]);
+  }, [selected, seats, cinemaId, activePrice]);
 
-  const activePrice = pricePerSeat ?? config.pricePerSeat;
-  const total = selected.length * activePrice;
+  useEffect(() => {
+    onSelectedSeatsChange?.(selectedSeats);
+  }, [selectedSeats, onSelectedSeatsChange]);
 
   const removeById = (id: string) => {
     const dbSeat = seats.find((s) => s.id === id);
@@ -550,15 +580,17 @@ export function UltraSeatMap({ cinemaId, pricePerSeat }: { cinemaId: string | un
         </div>
       </div>
 
-      <BookingSummarySidebar
-        pricePerSeat={activePrice}
-        selectedCount={selected.length}
-        total={total}
-        selectedSeats={selectedSeats}
-        onRemoveSeat={removeById}
-        seatTypeLabel={config.label}
-        cinemaId={cinemaId}
-      />
+      {!hideSidebar && (
+        <BookingSummarySidebar
+          pricePerSeat={activePrice}
+          selectedCount={selected.length}
+          total={total}
+          selectedSeats={selectedSeats}
+          onRemoveSeat={removeById}
+          seatTypeLabel={config.label}
+          cinemaId={cinemaId}
+        />
+      )}
     </div>
   );
 }
