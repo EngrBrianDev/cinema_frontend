@@ -138,6 +138,7 @@ export function C2SeatMap({
       const dbSeat = seats.find((s) => s.seatNumber === sn);
       return {
         id: dbSeat?.id || sn,
+        seatNumber: sn,
         label: sn,
         cinemaId,
         price: activePrice,

@@ -267,6 +267,7 @@ export function UltraSeatMap({
       const dbSeat = seats.find((s) => s.seatNumber === key);
       return {
         id: dbSeat?.id || key,
+        seatNumber: key,
         label: labelByKey.get(key) ?? key,
         cinemaId,
         price: activePrice,

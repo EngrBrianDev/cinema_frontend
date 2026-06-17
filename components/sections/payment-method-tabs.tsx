@@ -20,6 +20,7 @@ type CheckoutSummary = {
   seatTypeLabel?: string;
   seats?: {
     id: string;
+    seatNumber?: string;
     label: string;
     cinemaId: string;
     price: number;
@@ -81,14 +82,14 @@ export function PaymentMethodTabs() {
 
       for (let idx = 0; idx < totalTicketsCount; idx++) {
         const seat = seats[idx];
-        const seatLabel = seat ? seat.label : summary.selectedSeats[idx];
+        const dbSeatNumber = seat ? (seat.seatNumber || seat.label) : summary.selectedSeats[idx];
         const cinemaId = seat ? seat.cinemaId : summary.cinemaId;
 
         const reservation = await apiFetch("/reservations", {
           method: "POST",
           body: {
             cinemaId,
-            seatNumber: seatLabel,
+            seatNumber: dbSeatNumber,
             totalTicketsCount,
           },
         }) as ReservationResult;
