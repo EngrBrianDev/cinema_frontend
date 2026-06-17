@@ -25,7 +25,7 @@ export function MovieDetailsPage() {
         <HardShadowCard shadow="yellow">
           <p className="font-label text-xs uppercase text-outline">Venue</p>
           <h3 className="mt-2 font-headline text-2xl font-extrabold uppercase">Cinema 2 & Ultra Cinema</h3>
-          <p className="mt-2">4th Floor Uptown Mall, BGC</p>
+          <p className="mt-2">Cinema 2 & Ultra Cinema at 3rd Floor, Uptown Mall BGC</p>
           <Link
             href="/seats"
             className="mt-6 inline-flex w-full items-center justify-center rounded border-2 border-black bg-secondary px-5 py-3 text-center font-headline text-sm font-bold uppercase text-white"
