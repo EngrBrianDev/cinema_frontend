@@ -10,7 +10,7 @@ export function SeatSelectionPage() {
         <div className="motion-stagger flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="mb-4 inline-block border-2 border-on-background bg-tertiary px-4 py-1.5 font-label text-xs font-bold uppercase tracking-widest text-white">
-              Uptown Mall BGC
+              Cinema 2 & Ultra Cinema at 3rd Floor
             </span>
             <h2 className="font-headline text-6xl font-extrabold uppercase leading-none text-primary lg:text-8xl">
               SELECT SEATS
